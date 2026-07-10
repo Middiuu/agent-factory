@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -u
+
+case "${MOCK_DISCOVER_SCENARIO:-success}" in
+  success)
+    printf 'name = web-search\nversion = 1.0.0\ndescription = mock package\n'
+    ;;
+  absent)
+    printf 'npm ERR! code E404\nnpm ERR! 404 Not Found\n' >&2
+    exit 1
+    ;;
+  network)
+    printf 'npm ERR! code ENETUNREACH\n' >&2
+    exit 1
+    ;;
+  timeout)
+    exit 124
+    ;;
+esac

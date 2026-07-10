@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "evidence_class": "self-reported non-reproducible snapshot",
+  "reproducible": false,
+  "skill": "agent-workspace-builder",
+  "scenario_id": 1,
+  "scenario": "minimal-native-capabilities",
+  "prompt": "Crea un workspace minimale per un agente che rinomina e organizza file Markdown locali. Il coding agent ha già capacità native sufficienti e non servono tool esterni.",
+  "executed_at_utc": "2026-07-10T08:50:00Z",
+  "executor": "GPT-5",
+  "runs_per_configuration": 1,
+  "baseline": {
+    "kind": "pre-refactor snapshot",
+    "legacy_commit": "76d41b7",
+    "score": {"passed": 2, "total": 5},
+    "evidence": [
+      "Base workspace present",
+      "Created a redundant markdown-organizer local skill",
+      "Created RESEARCH.md although external discovery was not applicable",
+      "Used a date-only report name",
+      "Passed the historical validator"
+    ]
+  },
+  "refactor": {
+    "kind": "working tree after contract refactor",
+    "score": {"passed": 5, "total": 5},
+    "evidence": [
+      "Base workspace present",
+      "skills directory intentionally empty",
+      "RESEARCH.md omitted with non-applicability recorded in the report",
+      "Timestamped report name and UTC timestamp matched",
+      "Passed the current validator used for the run"
+    ]
+  },
+  "expectations": [
+    "README.md, AGENTS.md, skills/ and reports/ exist",
+    "No redundant local skill is created",
+    "No artificial research artifact is created",
+    "The current report has a unique timestamped name",
+    "The validator for the evaluated configuration passes"
+  ],
+  "reproduction": {
+    "scenario_source": "../evals.json",
+    "validator_command": "bash scripts/validate-workspace.sh WORKSPACE_ROOT",
+    "grading": "manual objective assertions recorded immediately after each run"
+  },
+  "limitations": [
+    "Timing, tokens and tool-call counts were not exposed and were not compared",
+    "The run predates the final report-schema hardening; the behavioral expectations remain unchanged",
+    "One deterministic scenario is not broad client or provider coverage",
+    "Raw temporary output and the local HTML viewer are intentionally not treated as durable evidence",
+    "The baseline commit is intentionally absent from the replacement Git history"
+  ]
+}

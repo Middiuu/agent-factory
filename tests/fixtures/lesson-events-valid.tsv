@@ -1,0 +1,9 @@
+schema_version	event_id	date	cycle_id	agent_type	variant_id	event_kind	real	draft_state
+1	news-generation-one	2026-07-01	news-cycle-one	research	news-brief	generation	true	none
+1	news-generation-one-repeat	2026-07-01	news-cycle-one	research	news-brief	generation	true	none
+1	news-generation-two	2026-07-02	news-cycle-two	research	news-brief	generation	true	none
+1	news-proposal	2026-07-02	news-proposal-cycle	research	news-brief	proposal	false	proposed
+1	news-generation-three	2026-07-03	news-cycle-three	research	news-brief	generation	true	none
+1	news-approval	2026-07-04	news-approval-cycle	research	news-brief	approval	false	approved
+1	news-promotion	2026-07-05	news-promotion-cycle	research	news-brief	promotion	false	approved
+1	simple-generation	2026-07-01	simple-cycle-one	minimal	simple-helper	generation	true	none

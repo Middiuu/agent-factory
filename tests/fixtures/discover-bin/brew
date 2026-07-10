@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -u
+
+case "${MOCK_DISCOVER_SCENARIO:-success}" in
+  success)
+    printf 'web-search\nweb-search-cli\n'
+    ;;
+  absent)
+    exit 0
+    ;;
+  network)
+    printf 'network unavailable\n' >&2
+    exit 7
+    ;;
+  timeout)
+    exit 124
+    ;;
+esac

@@ -1,0 +1,40 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate factory
+        run: bash scripts/validate-factory.sh
+
+      - name: Validate example workspaces
+        run: |
+          for workspace in examples/*; do
+            bash scripts/validate-workspace.sh "$workspace"
+          done
+
+      - name: Test workspace validator and ledger
+        run: bash scripts/test-validators.sh
+
+      - name: Test discovery with deterministic mocks
+        run: bash scripts/test-discover.sh
+
+      - name: Validate lessons ledger commands
+        env:
+          LESSONS_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          bash scripts/lessons-ledger.sh validate
+          bash scripts/lessons-ledger.sh summary
+          bash scripts/lessons-ledger.sh eligible

@@ -1,0 +1,5 @@
+schema_version	event_id	date	cycle_id	agent_type	variant_id	event_kind	real	draft_state
+1	evt-20260707-001	2026-07-07	cycle-legacy-001	research	research-local-directory	generation	true	none
+1	evt-20260707-002	2026-07-07	cycle-legacy-002	research	research-news-email	generation	true	none
+1	evt-20260707-003	2026-07-07	cycle-provider-001	research	research-sourced-report	provider_test	false	none
+1	evt-20260708-001	2026-07-08	cycle-legacy-003	web-dev	web-static-showcase	generation	true	none

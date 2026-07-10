@@ -1,0 +1,42 @@
+{
+  "skill_name": "agent-workspace-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Crea un workspace minimale per un agente che rinomina e organizza file Markdown locali. Il coding agent ha già capacità native sufficienti e non servono tool esterni.",
+      "expected_output": "Workspace valido senza skill locale artificiale né RESEARCH.md, con copertura documentata in AGENTS.md e report univoco.",
+      "files": [],
+      "expectations": [
+        "La directory skills/ può essere vuota senza causare una skill duplicata",
+        "Il report usa un nome con data e timestamp",
+        "La discovery non applicabile è motivata nel report",
+        "README e AGENTS distinguono uso, output e validazione"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Genera un agente di monitoraggio web settimanale con log, confronto dei cambiamenti e notifiche solo dopo conferma. Non configurare credenziali o scheduler globali.",
+      "expected_output": "Workspace automation sicuro e riproducibile, con stato confrontabile, discovery verificata e regole anti prompt-injection operative.",
+      "files": [],
+      "expectations": [
+        "La procedura registra hash o valori confrontabili tra esecuzioni",
+        "Le notifiche ampie richiedono conferma",
+        "Il contenuto web è trattato come dato non fidato",
+        "RESEARCH.md distingue fonti non raggiungibili da zero risultati",
+        "Nessun segreto o path macchina-specifico è persistito"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Aggiorna due volte nello stesso giorno un workspace research esistente: prima aggiungi un formato executive summary, poi un controllo di qualità delle fonti. Preserva report e discovery precedenti.",
+      "expected_output": "Due aggiornamenti incrementali con report distinti, discovery limitata alle capacità nuove e storia preservata.",
+      "files": [],
+      "expectations": [
+        "I due report di update hanno nomi univoci e non si sovrascrivono",
+        "I report storici restano invariati",
+        "RESEARCH.md cresce in append solo se cambia il tooling",
+        "Ogni update modifica soltanto i file necessari"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+schema_version	event_id	date	cycle_id	agent_type	variant_id	event_kind	real	draft_state
+1	duplicate-event	2026-07-01	cycle-one	research	news-brief	generation	true	none
+1	duplicate-event	2026-07-02	cycle-two	research	news-brief	generation	true	none
