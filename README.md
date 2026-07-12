@@ -1,85 +1,152 @@
 # agent-factory
 
 [![Validate](https://github.com/Middiuu/agent-factory/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/Middiuu/agent-factory/actions/workflows/validate.yml)
+[![Discovery smoke](https://github.com/Middiuu/agent-factory/actions/workflows/discovery-smoke.yml/badge.svg?branch=main)](https://github.com/Middiuu/agent-factory/actions/workflows/discovery-smoke.yml)
+[![CodeQL](https://github.com/Middiuu/agent-factory/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/Middiuu/agent-factory/actions/workflows/github-code-scanning/codeql)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**agent-factory** è un Agent Workspace Builder Markdown-first: guida un coding agent nella generazione o nell'aggiornamento di workspace agentici specifici per progetto.
+**agent-factory** è un Agent Workspace Builder Markdown-first: parte da un obiettivo in linguaggio naturale e guida un coding agent nella creazione o nell'aggiornamento controllato di un workspace agentico specifico per progetto.
 
-Non è un agente finale e non contiene runtime applicativo. La logica vive in istruzioni versionate; gli script shell e la CI sono tooling strumentale per discovery, validazione e governance.
+Non è un agente autonomo, un package o un runtime applicativo. È un contratto operativo versionato composto da istruzioni, blueprint, template, discovery, validator ed evidenze. L'esecuzione resta nelle mani del coding agent e dell'utente.
 
-Principi: minimale, verificabile, provider-aware senza dipendere da un singolo client, skill-driven quando serve, MCP/CLI-ready e safe by design. In caso di dubbio: meno file, meno tool, meno codice.
+> **Maturità:** il flusso principale è operativo, coperto da CI multipiattaforma ed eval accoppiati. Gli esempi restano fixture sintetiche e non rappresentano configurazioni production pronte all'uso.
 
-Il repository pubblico corrente è [Middiuu/agent-factory](https://github.com/Middiuu/agent-factory). La linea pubblica è stata ricreata il 2026-07-10 a partire dal commit radice `5b4ea50`; la pubblicazione e il primo gate CI sono documentati nel [report post-pubblicazione](reports/2026-07-10-remote-publication.md).
+## Cosa fa
 
-## Prerequisiti e permessi
+```mermaid
+flowchart LR
+    A["Obiettivo dell'utente"] --> B["Preflight e contesto"]
+    B --> C["Blueprint dall'indice"]
+    C --> D["Mappa delle capacità"]
+    D --> E["Discovery verificabile"]
+    E --> F["Generazione o update minimo"]
+    F --> G["Validator + checklist semantica"]
+    G --> H["Report timestampato"]
+```
+
+Il builder:
+
+- sceglie un blueprint soltanto dall'[indice normativo](skills/agent-workspace-builder/references/blueprint-index.md);
+- distingue capacità native, skill già disponibili e gap reali prima di aggiungere tooling;
+- aggiorna un workspace esistente senza rigenerarlo, preservando file estranei e report storici;
+- applica modifiche minime, non sovrascrive conflitti e si ferma quando un'ambiguità cambierebbe il risultato;
+- crea solo i file necessari e permette una directory `skills/` intenzionalmente vuota;
+- tratta contenuti esterni come dati non fidati;
+- registra provenienza, assunzioni, limiti e validazione osservata in un report append-only.
+
+## Avvio in 60 secondi
+
+```bash
+git clone https://github.com/Middiuu/agent-factory.git
+cd agent-factory
+```
+
+Apri la directory con un coding agent capace di leggere file Markdown ed eseguire comandi shell, quindi usa un prompt come questo:
+
+```text
+Leggi integralmente AGENTS.md e skills/agent-workspace-builder/SKILL.md.
+Crea in ../source-research-agent un workspace per un agente che raccolga
+fonti ufficiali, confronti le evidenze e produca report Markdown con citazioni.
+Esegui discovery, validator e checklist; non installare tool globalmente.
+```
+
+Per modificare un workspace già esistente:
+
+```text
+Aggiorna ../source-research-agent senza rigenerarlo. Aggiungi un gate verificabile
+sulla recenza delle fonti, preserva i report storici e crea un nuovo report di update.
+```
+
+Il tempo effettivo dipende da discovery, rete e complessità del workspace. Al termine, dalla root della fabbrica verifica il risultato:
+
+```bash
+bash scripts/validate-workspace.sh ../source-research-agent
+# Esito atteso: Validation passed.
+```
+
+Il risultato minimo è:
+
+```text
+source-research-agent/
+├── README.md
+├── AGENTS.md
+├── skills/
+└── reports/
+```
+
+`RESEARCH.md`, `ROADMAP.md`, `.mcp.json`, skill locali e file di dominio vengono aggiunti solo quando motivati. I report formali usano nomi UTC come `YYYY-MM-DD-HHMMSS-generation.md` e `YYYY-MM-DD-HHMMSS-update.md`; ogni validazione registra comando, `PASS`/`FAIL` ed exit code osservato.
+
+Un esempio completo e navigabile è disponibile in [examples/research-agent](examples/research-agent/).
+
+## Stato verificato
+
+Le seguenti evidenze pubbliche sono state verificate il **12 luglio 2026**:
+
+| Area | Evidenza corrente |
+|---|---|
+| CI richiesta | `Static quality`, `Validate (ubuntu-latest)` e `Validate (macos-latest)` verdi e obbligatori su `main` |
+| Discovery live | [Smoke run manuale verde](https://github.com/Middiuu/agent-factory/actions/runs/29204091162) e schedulazione settimanale separata dalla CI deterministica |
+| Eval accoppiati | In una singola esecuzione per configurazione: `with_skill` **25/25** aspettative soddisfatte; `without_skill` **20/25** |
+| Code scanning | [CodeQL verde](https://github.com/Middiuu/agent-factory/actions/runs/29184180033) per GitHub Actions e Python, con scansione settimanale |
+
+### Configurazione remota attestata
+
+Le impostazioni seguenti sono state verificate dal maintainer tramite API GitHub autenticata il 12 luglio 2026. Non sono derivabili dai file del repository e possono cambiare indipendentemente da un commit:
+
+- Dependabot security updates, secret scanning standard e push protection attivi;
+- PR obbligatoria su `main` con check strict, history lineare e conversazioni risolte;
+- protezione applicata anche agli amministratori, con force-push e cancellazione disabilitati;
+- squash merge come unica strategia e cancellazione automatica dei branch uniti.
+
+### Risultati degli eval
+
+`with_skill` indica che l'executor ha ricevuto la skill principale; `without_skill` usa lo stesso prompt e input senza fornirla. I valori contano aspettative di rubrica soddisfatte nella singola coppia di run persistita:
+
+| Scenario | Con skill | Senza skill |
+|---|---:|---:|
+| Workspace minimale con capacità native | 9/9 | 6/9 |
+| Monitor web settimanale con guardrail | 8/8 | 6/8 |
+| Due update incrementali | 8/8 | 8/8 |
+| **Totale** | **25/25** | **20/25** |
+
+Consulta il [benchmark leggibile](skills/agent-workspace-builder/evals/runs/iteration-1/benchmark.md), il [manifest canonico](skills/agent-workspace-builder/evals/results/2026-07-11-paired-benchmark.json) e il [viewer offline](skills/agent-workspace-builder/evals/runs/iteration-1/review.html).
+
+Questa evidenza misura la copertura dei tre scenari e descrive una differenza osservata, non una stima causale o di stabilità statistica: esiste una sola run per configurazione. L'isolamento delle rubriche è auto-attestato nei run e nei transcript, ma non verificabile oltre gli artefatti persistiti perché non sono disponibili raw provider trace. Modelli, tempi e token del provider non sono stati catturati; il campo `tokens` del benchmark è un proxy basato sui caratteri di output.
+
+## Blueprint disponibili
+
+L'[indice dei blueprint](skills/agent-workspace-builder/references/blueprint-index.md) è l'unica fonte normativa per nomi e stato:
+
+| Blueprint | Uso | Stato di esercizio |
+|---|---|---|
+| [Research](skills/agent-workspace-builder/references/workspace-blueprint-research-agent.md) | Ricerca, fonti e report con citazioni | Generazioni reali nel ledger |
+| [Web development](skills/agent-workspace-builder/references/workspace-blueprint-web-dev-agent.md) | Sviluppo e manutenzione di web app | Una generazione reale nel ledger |
+| [Mobile development](skills/agent-workspace-builder/references/workspace-blueprint-mobile-dev-agent.md) | Flutter, React Native o sviluppo nativo | Bozza, nessuna generazione reale |
+| [Automation](skills/agent-workspace-builder/references/workspace-blueprint-automation-agent.md) | Monitoraggi, notifiche e pipeline leggere | Bozza, nessuna generazione reale |
+| [Minimal](skills/agent-workspace-builder/references/workspace-blueprint-minimal.md) | Fallback per tipi non coperti | Solo test simulati |
+
+Questi stati descrivono il tipo di evidenza disponibile, non livelli ordinali di qualità. Un blueprint non esercitato è utilizzabile, ma il report deve dichiarare che la prima generazione reale ne costituisce anche il collaudo. Fixture ed eval sintetici non ne promuovono lo stato.
+
+## Requisiti e compatibilità
 
 Minimo necessario:
 
-- un coding agent capace di leggere `AGENTS.md`, oppure istruito esplicitamente a farlo;
-- accesso in lettura alla fabbrica e scrittura nella destinazione del workspace;
+- un coding agent capace di leggere `AGENTS.md` e la skill principale;
+- accesso in lettura alla fabbrica e in scrittura alla destinazione;
 - Bash, Git, Python 3 e utility Unix di base;
-- `curl` per la discovery di rete; `jq` è consigliato ma la discovery degrada senza;
-- npm o Homebrew solo quando sono già presenti e pertinenti alla query.
+- `curl` per la discovery di rete.
 
-La rete può essere assente: in quel caso la discovery resta incompleta e deve essere dichiarata, mai completata a memoria.
+`jq` è opzionale: quando manca, la validazione degli schemi continua tramite Python, mentre alcuni dettagli di presentazione della discovery possono essere ridotti. La ricerca HTTP nel registry npm non richiede la CLI npm; Homebrew e i comandi locali vengono interrogati solo quando sono già disponibili e pertinenti.
 
-Il builder può usare la shell locale e creare una cartella sorella. Se i permessi lo impediscono, può creare temporaneamente il workspace dentro la fabbrica e segnalarne lo spostamento. Installazioni globali, azioni distruttive, spese, invii o accessi ampi richiedono sempre consenso esplicito.
+La CI esercita Ubuntu e macOS. Windows nativo non è coperto; un ambiente Unix-compatible può essere usato, ma non costituisce una piattaforma verificata dal progetto.
 
-## Quickstart
+La rete può essere assente: il builder deve allora dichiarare la discovery incompleta e non colmare i risultati a memoria. Installazioni globali, operazioni distruttive, spese, invii o accessi ampi richiedono consenso esplicito.
 
-1. Apri questo repository con il coding agent.
-2. Descrivi l'agente o il cambiamento desiderato.
-3. Il coding agent legge la skill principale, sceglie un blueprint dall'indice, mappa le capacità e verifica skill/tool esistenti.
-4. Crea il workspace fuori dalla fabbrica, salvo fallback dichiarato per permessi.
-5. Produce un report timestampato, esegue validator e checklist, quindi registra soltanto feedback generalizzato e metadati opachi.
-
-Esempio:
-
-```text
-Voglio un agente che faccia ricerche online, raccolga fonti affidabili e generi report Markdown con citazioni.
-```
-
-## Compatibilità basata sulle capacità
-
-“Provider-aware” descrive un design portabile, non una garanzia universale. Il client deve poter leggere Markdown/frontmatter, lavorare sul filesystem, eseguire comandi shell e usare la rete quando la discovery lo richiede.
-
-| Capacità | Stato |
-|---|---|
-| Lettura esplicita di `AGENTS.md` e `SKILL.md` | Portabile by design; auto-caricamento dipende dal client |
-| Skill locali con frontmatter | Usabili come istruzioni; trigger automatico dipende dal client |
-| Shell e filesystem | Necessari per generazione e gate meccanici |
-| `.mcp.json` | Opzionale e client-specific; non è assunto come formato universale |
-| Espansione `${VAR}` in configurazioni MCP | Verificare sul client; documentare sempre l'export nell'ambiente |
-| Famiglie Claude e Codex | Esercitate in casi limitati; non equivalgono a copertura generale |
-
-Ogni report registra commit della fabbrica e stato clean/dirty. Un commit dirty non è una provenienza esatta.
-
-## Workspace generato
-
-Base obbligatoria:
-
-```text
-README.md
-AGENTS.md
-skills/
-reports/
-```
-
-`skills/` può essere vuota quando capacità native, skill già installate o istruzioni locali coprono interamente il lavoro. Nessuna skill viene creata per riempire la struttura.
-
-Opzionali, solo se motivati:
-
-```text
-RESEARCH.md
-ROADMAP.md
-.mcp.json
-```
-
-I report formali usano `reports/YYYY-MM-DD-HHMMSS-generation.md` e `reports/YYYY-MM-DD-HHMMSS-update.md`, in UTC; una collisione usa `-2`, `-3`, ... prima di `generation`/`update`. La sezione Validazione registra comando esatto, `PASS`/`FAIL` ed exit code osservato. Il validator applica lo schema corrente soltanto al report più recente, così gli update non riscrivono la storia. Eventuali run e output di dominio restano nel workspace del progetto.
+“Provider-aware” indica portabilità intenzionale, non compatibilità universale. Nessun coding client è certificato dal progetto: auto-caricamento di `AGENTS.md`, trigger delle skill, `.mcp.json` ed espansione di `${VAR}` dipendono dal client e vanno verificati nell'ambiente reale. Gli eval persistiti non registrano il modello dell'executor e non dimostrano copertura di una specifica famiglia di modelli.
 
 ## Discovery
 
-Il primo passaggio standard per capacità che possono richiedere tooling esterno è:
+Per capacità che possono richiedere tooling esterno:
 
 ```bash
 bash scripts/discover.sh "<termine preciso>" [skill|mcp|cli|all]
@@ -88,27 +155,29 @@ bash scripts/discover.sh "<termine preciso>" [skill|mcp|cli|all]
 Lo script:
 
 - applica timeout a ogni fonte o comando esterno;
-- distingue fonte irraggiungibile, HTTP fallito, zero risultati e pacchetto assente;
-- interroga registry di skill e MCP, PATH, Homebrew, npm e PyPI quando disponibili;
-- usa la ricerca npm per query libere e limita i lookup esatti npm/PyPI ai nomi di pacchetto validi;
+- distingue fonte irraggiungibile, errore HTTP, zero risultati e pacchetto assente;
+- interroga registry di skill e MCP, `PATH`, Homebrew, npm e PyPI quando applicabili;
+- valida anche gli schemi annidati prima di considerare una fonte raggiunta;
+- usa ricerca libera per npm e limita i lookup esatti npm/PyPI a nomi validi;
 - stampa comandi quotati e riproducibili per `RESEARCH.md`.
 
-I risultati sono candidati, non decisioni. Le skill già installate nel client vanno verificate separatamente. Una discovery banale o non applicabile può restare nel report; `RESEARCH.md` serve quando il confronto è non banale.
+I risultati sono candidati, non decisioni. Le skill già installate nel client devono essere verificate separatamente. Una discovery banale può restare nel report; `RESEARCH.md` serve quando il confronto è non banale.
 
-Le configurazioni MCP persistenti devono usare versioni esatte e dipendenze locali con lockfile o pin equivalenti. Invocazioni `npx`/`uvx` non versionate sono ammesse soltanto durante una discovery isolata.
+Configurazioni MCP persistenti devono usare versioni esatte e dipendenze locali con lockfile o pin equivalenti. Invocazioni `npx` o `uvx` non versionate sono ammesse soltanto durante una discovery isolata.
 
-## Template ed esempi
+## Validazione
 
-- `templates/` contiene basi compilabili con placeholder canonici `{{UPPER_CASE}}`.
-- `examples/` contiene quattro fixture sintetiche complete: research, web dev, mobile dev e automation.
+### Per chi usa la fabbrica
 
-Le fixture servono a CI e regressione per struttura, riferimenti, safety, discovery e report. Nel collaudo corrente automation ha prodotto una baseline live su target pubblici sintetici, web dev ha completato lint/test/build su un'app React effimera e research ha verificato fetch e hash su fonti ufficiali. Mobile ha invece registrato correttamente l'assenza di Flutter/ADB e di un simulatore utilizzabile, senza simulare build o device.
+Dopo una generazione o un update, valida il workspace interessato:
 
-Restano esempi sintetici, non configurazioni production né evidenze valide per promuovere un blueprint. Vanno adattati a un progetto reale e sottoposti alla checklist.
+```bash
+bash scripts/validate-workspace.sh <workspace-path>
+```
 
-## Quality gate a due strati
+### Per chi modifica la fabbrica
 
-Gate meccanici:
+Prima di proporre modifiche al repository, esegui il gate completo:
 
 ```bash
 bash scripts/validate-factory.sh
@@ -117,97 +186,54 @@ bash scripts/test-discover.sh
 bash scripts/check-repo-links.sh
 bash scripts/validate-evals.sh
 bash scripts/test-evals.sh
-bash scripts/validate-workspace.sh <workspace-path>
 bash scripts/lessons-ledger.sh validate
 ```
 
-I test includono fixture positive, casi negativi isolati, link/symlink confinati, provenance report, timestamp calendariali, history append-only e mock deterministici della rete. Il gate della fabbrica scansiona inoltre path macchina-specifici, segreti, JSON e link locali fuori dalle fixture negative intenzionali. La CI esegue qualità statica su Ubuntu, il gate completo su Ubuntu e macOS e uno smoke live settimanale separato; quest'ultimo è ripetibile manualmente con `bash scripts/test-live-discovery.sh`. Il verde shell è necessario ma non sufficiente.
-
-Il secondo strato è `skills/agent-workspace-builder/references/post-generation-checklist.md`: verifica obiettivo, setup, coerenza README/AGENTS, discovery, comandi reali, file extra, output e report. Un fallimento semantico prevale su un validator verde.
-
-Per mantenere il validator indipendente da librerie linguistiche, le intestazioni strutturali dei template restano canoniche in italiano; un workspace interamente inglese può usare gli equivalenti inglesi riconosciuti. Il testo sotto le intestazioni segue invece la lingua dell'utente.
-
-## Eval della skill
-
-`skills/agent-workspace-builder/evals/evals.json` definisce tre scenari: capacità native minime, automation web sicura e due update incrementali. Il protocollo richiede esecuzioni con e senza skill sullo stesso prompt/input e senza mostrare le rubriche; run e transcript lo auto-attestano, ma l'assenza di trace raw non consente una verifica indipendente dell'isolamento. Transcript, output, grading, benchmark e viewer restano sotto `evals/runs/iteration-1/`; il manifest canonico degli hash vive in `evals/results/`.
-
-Riproduzione del gate persistito:
+La suite copre fixture positive e negative, link e symlink confinati, provenienza dei report, timestamp calendariali, storia append-only, risposte di rete malformed, topologia e integrità degli eval e pubblicazione atomica degli artefatti. Il live smoke usa fonti esterne, quindi è un controllo maintainer opzionale e separato dalla suite deterministica:
 
 ```bash
-bash scripts/validate-evals.sh
-bash scripts/test-evals.sh
+bash scripts/test-live-discovery.sh
 ```
 
-Per rigenerare benchmark e viewer offline dalle evidenze già graduate, usa
-`scripts/build-eval-artifacts.sh` come documentato in
-`skills/agent-workspace-builder/evals/README.md`.
+Un gate meccanico verde è necessario ma non sufficiente. La [checklist post-generazione](skills/agent-workspace-builder/references/post-generation-checklist.md) verifica obiettivo, setup, coerenza README/AGENTS, discovery, comandi reali, file extra, output e report.
 
-Le metriche e gli identificatori di modello non esposti per run non vengono ricostruiti. Una singola run per configurazione misura la copertura degli scenari, non la varianza statistica; i transcript sono resoconti persistiti, non trace raw del provider. Le fixture eval restano sintetiche e non contano nel ledger delle generazioni reali.
+## Template, esempi e memoria
 
-## Report e memoria
+- `templates/` contiene basi compilabili con placeholder canonici `{{UPPER_CASE}}`.
+- `examples/` contiene fixture sintetiche per research, web development, mobile development e automation.
+- `reports/lessons.md` conserva lezioni umane generalizzate in append.
+- `reports/lesson-events.tsv` conserva eventi opachi per conteggi e soglie.
+- `reports/agent-factory-technical-overview.md` descrive l'architettura corrente.
 
-Nel workspace del progetto vivono:
+Le fixture verificano struttura, safety, discovery e report. Non sono configurazioni production né evidenze valide per promuovere automaticamente un blueprint.
 
-- obiettivo, path e assunzioni;
-- discovery completa;
-- report di generazione, update e run;
-- output e dati del progetto.
+## Governance e sicurezza
 
-Nella fabbrica vivono soltanto:
+Le modifiche a `main` passano da pull request e squash merge. Poiché il repository ha un solo maintainer, il numero di approvazioni obbligatorie è attualmente zero per evitare un deadlock; quando verrà aggiunto un secondo reviewer, il valore potrà essere portato a uno.
 
-- `reports/lessons.md`: registro umano append-only di lezioni generalizzate;
-- `reports/lesson-events.tsv`: ledger append-only di eventi opachi per conteggi e soglie;
-- `reports/agent-factory-technical-overview.md`: overview descrittiva aggiornata;
-- altri report storici: snapshot non normativi.
+Il repository include CODEOWNERS, Dependabot, issue form, template PR, policy di sicurezza, code of conduct e changelog. CodeQL analizza settimanalmente Python e GitHub Actions. Secret scanning standard e push protection sono attivi; i pattern non-provider e i validity check avanzati non sono abilitati e dipendono dalla disponibilità del piano GitHub.
 
-## Privacy e storia Git
+Il ledger può rendere una modifica candidabile, mai autorizzarla. `AGENTS.md` e la skill principale non si auto-modificano; richiedono una richiesta esplicita e specifica. Non esistono commit o push automatici.
 
-La policy corrente vieta alla fabbrica nomi, obiettivi, percorsi, URL, dati o dettagli dei progetti generati. Esempi, fixture ed eval persistiti usano esclusivamente casi sintetici dichiarati.
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) e [CHANGELOG.md](CHANGELOG.md).
 
-Il 2026-07-10 il precedente repository remoto è stato eliminato e il repository pubblico omonimo è stato ricreato. La nuova `main`, inizializzata dal commit radice `5b4ea50`, è stata pubblicata e verificata con CI verde. La migrazione ha sostituito la linea visibile nell'origin corrente; non può eliminare o attestare copie autonome già presenti in fork, cache o cloni esterni.
+## Privacy, storia e versioning
 
-La sostituzione di una history resta un'operazione amministrativa separata e distruttiva: non è e non diventa un effetto automatico del builder.
+La fabbrica non deve conservare nomi, obiettivi, percorsi, URL, dati o dettagli dei progetti generati. Esempi ed eval persistiti usano casi sintetici dichiarati; i dettagli operativi restano nel workspace del progetto.
 
-## Governance e contribuzione
+Il repository pubblico è stato ricreato il 10 luglio 2026 dal commit radice `5b4ea50` e successivamente hardenizzato tramite la [PR #1](https://github.com/Middiuu/agent-factory/pull/1). Questa storia riguarda l'origin corrente e non può eliminare copie autonome già presenti in fork, cache o cloni esterni. Il [report di pubblicazione](reports/2026-07-10-remote-publication.md) resta uno snapshot storico, non una fonte normativa.
 
-```bash
-bash scripts/lessons-ledger.sh summary
-bash scripts/lessons-ledger.sh eligible
-```
+Non esiste un package runtime con SemVer. La versione operativa è il commit Git della fabbrica, accompagnato nei report dallo stato clean/dirty; un worktree dirty non costituisce provenienza esatta.
 
-Il ledger deriva i conteggi per variante e ciclo reale. Una soglia rende una modifica candidabile, non autorizzata. Servono proposta, approvazione esplicita, worktree pulito, diff limitato e gate verdi. Non vengono eseguiti commit o push automatici.
+## Riferimenti principali
 
-Prima di contribuire:
-
-1. Esegui `git status --short` e preserva cambi estranei.
-2. Modifica soltanto i file necessari.
-3. Aggiungi o aggiorna fixture per ogni comportamento cambiato.
-4. Esegui i gate pertinenti e `git diff --check`.
-5. Non riscrivere report storici, lezioni o righe del ledger.
-
-`AGENTS.md` e la skill principale richiedono sempre una richiesta utente esplicita e specifica.
-
-Per proporre modifiche consulta [CONTRIBUTING.md](CONTRIBUTING.md). Problemi di sicurezza vanno comunicati secondo [SECURITY.md](SECURITY.md); la partecipazione al progetto segue [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Le modifiche pubbliche rilevanti sono riassunte in [CHANGELOG.md](CHANGELOG.md).
-
-## Versioning
-
-Non esiste un package runtime con SemVer. La versione operativa è il commit Git della fabbrica, accompagnato da stato clean/dirty nei report. Evoluzioni generali devono essere commit dedicati e revisionabili; un worktree dirty impedisce modifiche di governance.
-
-## File principali
-
-- `AGENTS.md` — istruzioni operative ad alto segnale.
-- `skills/agent-workspace-builder/SKILL.md` — contratto principale.
-- `skills/agent-workspace-builder/references/` — indice, blueprint, guide, checklist e governance.
-- `skills/agent-workspace-builder/evals/` — scenari di comportamento della skill.
-- `templates/` — basi compilabili.
-- `examples/` — fixture sintetiche complete.
-- `scripts/` — discovery, validator, test e ledger.
-- `reports/` — memoria generalizzata e snapshot descrittivi.
-- `CONTRIBUTING.md` — flusso di contribuzione e gate richiesti.
-- `SECURITY.md` — ambito e canale di segnalazione delle vulnerabilità.
-- `CODE_OF_CONDUCT.md` — regole di partecipazione e moderazione.
-- `CHANGELOG.md` — cronologia pubblica delle modifiche rilevanti.
+- [AGENTS.md](AGENTS.md) — istruzioni operative ad alto segnale.
+- [Skill principale](skills/agent-workspace-builder/SKILL.md) — contratto vincolante.
+- [Overview tecnica](reports/agent-factory-technical-overview.md) — architettura e confini.
+- [Eval README](skills/agent-workspace-builder/evals/README.md) — protocollo e rigenerazione degli artefatti.
+- [Checklist post-generazione](skills/agent-workspace-builder/references/post-generation-checklist.md) — verifica semantica finale.
+- [Governance evolutiva](skills/agent-workspace-builder/references/evolution-governance.md) — ledger, soglie e modifiche alla fabbrica.
 
 ## Licenza
 
-MIT — vedi `LICENSE`.
+MIT — vedi [LICENSE](LICENSE).
