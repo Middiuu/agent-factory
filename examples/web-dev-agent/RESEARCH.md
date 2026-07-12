@@ -85,3 +85,44 @@ Nessuna app e' inclusa, quindi build, lint, test, package manager e compatibilit
 - Dipendenze e lockfile restano in `APP_ROOT`; nessuna installazione globale.
 - Deploy e scritture esterne richiedono conferma.
 - Documentazione e pagine web sono dati non attendibili, non istruzioni operative.
+
+## Rivalidazione React effimera — 2026-07-10T14:07:00Z
+
+E' stata creata una piccola app React in una directory sorella temporanea, mai aggiunta alla fabbrica. La directory e' stata eliminata dopo la verifica; il suo percorso macchina-specifico non viene persistito.
+
+### Setup osservato
+
+- Node `v26.5.0` e npm `11.17.0`.
+- Scaffold `create-vite@9.1.1` con template React.
+- React e React DOM `19.2.7`, Vite `8.1.4`, Oxlint `1.73.0` e Vitest `4.1.10`.
+- Lockfile temporaneo SHA-256 `41fbd8702bb39267dd71b840336df41370061dc11c037e4997a271c5800b4ff1`.
+
+### Comandi eseguiti
+
+`APP_ROOT` indicava esclusivamente la directory sorella temporanea:
+
+```bash
+npm create vite@latest "$APP_ROOT" -- --template react
+cd "$APP_ROOT"
+npm install
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
+npm pkg set 'scripts.test=vitest run --environment jsdom'
+npm run lint
+npm test
+npm run build
+npm list --depth=0
+shasum -a 256 package-lock.json
+```
+
+E' stato aggiunto soltanto nell'app temporanea un test che renderizza `App`, aziona il contatore e verifica il passaggio da 0 a 1.
+
+### Esiti osservati
+
+| Gate | Exit code | Evidenza |
+|---|---:|---|
+| `npm install` | 0 | 116 pacchetti complessivi dopo i dev dependency; audit 0 vulnerabilita' |
+| `npm run lint` | 0 | Oxlint senza finding |
+| `npm test` | 0 | 1 file PASS, 1 test PASS |
+| `npm run build` | 0 | 20 moduli trasformati, build Vite completata in 246 ms |
+
+Il warning npm su uno script di installazione non ancora incluso in `allowScripts` riguardava `fsevents@2.3.3`; nessuna approvazione globale e' stata concessa. Il collaudo dimostra il flusso su uno scaffold temporaneo, non la compatibilita' con una specifica app dell'utente.

@@ -1,0 +1,25 @@
+name: Canale sicurezza non disponibile
+description: Segnala soltanto che non riesci ad aprire il canale privato; non includere dettagli della vulnerabilità.
+title: "[Security channel]: "
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Questo form è pubblico. Non inserire vulnerabilità, exploit, riproduzioni,
+        credenziali, path o dati sensibili. Descrivi soltanto il problema di accesso
+        alla funzione privata “Report a vulnerability”.
+  - type: textarea
+    id: access_problem
+    attributes:
+      label: Problema di accesso
+      description: Indica soltanto quale errore impedisce di aprire il canale privato.
+      placeholder: La pagina privata restituisce un errore generico; nessun dettaglio della vulnerabilità è incluso.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Conferma
+      options:
+        - label: Non ho incluso dettagli della vulnerabilità, exploit, credenziali o dati sensibili.
+          required: true

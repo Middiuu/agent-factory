@@ -1,0 +1,17 @@
+{
+  "eval_id": 3,
+  "eval_name": "two-updates",
+  "prompt": "Aggiorna due volte nello stesso giorno un workspace research esistente: prima aggiungi un formato executive summary, poi un controllo di qualità delle fonti. Preserva report e discovery precedenti.",
+  "expected_output": "Due aggiornamenti incrementali con report distinti, discovery limitata alle capacità nuove e storia preservata.",
+  "input_fixture": "evals/files/research-seed",
+  "assertions": [
+    "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+    "Dopo il secondo update, README o AGENTS definisce un gate verificabile per provenienza, recenza, supporto diretto, indipendenza o corroborazione e gestione delle fonti incerte o scartate",
+    "I due report di update hanno nomi univoci e non si sovrascrivono",
+    "I report storici restano invariati",
+    "RESEARCH.md cresce in append solo se cambia il tooling",
+    "Ogni update modifica soltanto i file necessari",
+    "Hash o confronto byte-a-byte dimostrano che i report storici sono rimasti invariati",
+    "Il validator corrente termina con exit code 0 dopo ciascun update"
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "expectations": [
+    {
+      "text": "La directory skills/ può essere vuota senza causare una skill duplicata",
+      "passed": true,
+      "evidence": "L'inventario indipendente trova `outputs/workspace/skills/` vuota: non esistono `SKILL.md` o altri file nella directory. README dichiara che `skills/` resta intenzionalmente vuota e il validator corrente conferma `no local skills found` con exit code 0."
+    },
+    {
+      "text": "Il report usa un nome con data e timestamp",
+      "passed": true,
+      "evidence": "Il solo report è `reports/2026-07-11-074323-generation.md`; al suo interno compaiono `Timestamp UTC: 2026-07-11T07:43:23Z` e `Nome file: 2026-07-11-074323-generation.md`. Data e ora coincidono esattamente."
+    },
+    {
+      "text": "La discovery non applicabile è motivata nel report",
+      "passed": true,
+      "evidence": "La sezione `## Discovery` del report dice `Non applicabile` e motiva la scelta con la sufficienza nativa esplicitata dal prompt, l'assenza di gap nella matrice e l'assenza di skill, CLI o MCP da aggiungere."
+    },
+    {
+      "text": "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+      "passed": true,
+      "evidence": "README contiene `## Quickstart` e `## Output attesi`. In AGENTS il workflow verifica prima la radice e il percorso canonico (passo 2), rileva collisioni e destinazioni esistenti (passo 4), richiede conferma (passo 5), vieta sovrascritture (passo 6 e Boundaries) e prescrive controlli post-operazione nella sezione `## Validazione`."
+    },
+    {
+      "text": "RESEARCH.md è omesso perché non esiste un gap di capacità da investigare",
+      "passed": true,
+      "evidence": "L'inventario indipendente conferma che `RESEARCH.md` non esiste. La matrice del report assegna `nessuno` a ogni gap e la sezione Discovery collega esplicitamente l'assenza di gap alla decisione di non creare `RESEARCH.md`."
+    },
+    {
+      "text": "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+      "passed": true,
+      "evidence": "Riesecuzione indipendente del comando corrente sul workspace: output finale `Validation passed.` ed exit code 0. Il report registra `Tentativo 3: PASS — exit code 0`; transcript e run.json registrano inoltre il PASS sulla copia finale in `outputs/workspace`."
+    },
+    {
+      "text": "Il workflow individua, aggiorna e verifica i collegamenti Markdown relativi interessati dagli spostamenti",
+      "passed": true,
+      "evidence": "AGENTS richiede di includere nel piano i link relativi interessati (passo 5), aggiorna soltanto link e immagini relative la cui destinazione è cambiata (passo 7) e verifica che ogni link relativo modificato risolva a una destinazione esistente (`## Validazione`)."
+    },
+    {
+      "text": "README contiene una sezione di validazione con un comando autonomo ripetibile",
+      "passed": true,
+      "evidence": "README contiene `## Validazione` e un blocco shell autonomo che imposta `WORKSPACE_ROOT` dalla directory corrente e controlla in modo ripetibile README.md, AGENTS.md, skills/ e reports/. Documenta separatamente anche il comando del validator quando la fabbrica è disponibile."
+    },
+    {
+      "text": "Il workflow resta nella directory autorizzata, non segue symlink, non elimina file e limita le modifiche di contenuto ai collegamenti relativi necessari",
+      "passed": true,
+      "evidence": "AGENTS limita l'operazione alla radice autorizzata e al suo percorso canonico (Ruolo e passi 2-3), non segue symlink esterni, vieta eliminazioni e sovrascritture e consente modifiche di contenuto soltanto ai link relativi resi obsoleti dagli spostamenti approvati (passo 7 e Boundaries)."
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "Il workspace passa il validator corrente.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Il grader ha rieseguito `bash scripts/validate-workspace.sh` sul workspace corrente: `Validation passed.`, exit code 0."
+    },
+    {
+      "claim": "Non sono state create skill locali, integrazioni esterne o RESEARCH.md.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "L'inventario completo contiene soltanto README.md, AGENTS.md, la directory skills/ vuota e il report; run.json e transcript non elencano altri artefatti."
+    },
+    {
+      "claim": "Il workflow preserva in una esecuzione reale ogni contenuto non coinvolto dagli aggiornamenti dei link.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "La regola è documentata in AGENTS e README, ma questa run genera soltanto il workspace: non esegue rinomine su un corpus di file né confronti pre/post dei contenuti."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+        "reason": "L'aspettativa aggrega sette verifiche: separare almeno il preflight dalle altre salvaguardie renderebbe il fallimento più diagnostico senza cambiare ciò che viene misurato."
+      }
+    ],
+    "overall": "Le aspettative verificano gli esiti documentali e distinguono la copertura funzionale e di sicurezza; resta utile scomporre l'unica aspettativa fortemente composta."
+  }
+}

@@ -7,8 +7,8 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATOR="$ROOT/scripts/validate-workspace.sh"
-FACTORY_VALIDATOR="$ROOT/scripts/validate-factory.sh"
 LEDGER_TOOL="$ROOT/scripts/lessons-ledger.sh"
+LINK_CHECKER="$ROOT/scripts/check-repo-links.py"
 failures=0
 runtime_test_root="$(mktemp -d "${TMPDIR:-/tmp}/agent-factory-validator-tests.XXXXXX")"
 trap 'rm -rf "$runtime_test_root"' EXIT
@@ -47,7 +47,8 @@ run_valid_workspace() {
 }
 
 run_invalid_workspace() {
-  local fixture="$1" marker="$2" ws="$ROOT/tests/fixtures/$fixture" output rc
+  local fixture="$1" marker="$2" output rc
+  local ws="$ROOT/tests/fixtures/$fixture"
   output="$(bash "$VALIDATOR" "$ws" 2>&1)"
   rc=$?
   if [ "$rc" -ne 0 ]; then
@@ -100,6 +101,16 @@ awk '
 mv "$dynamic_report.tmp" "$dynamic_report"
 run_dynamic_invalid validation-without-evidence 'validation section must record an exact command' 'validation without command or outcome'
 
+create_dynamic_workspace validation-with-unnumbered-exit
+dynamic_report="$runtime_test_root/validation-with-unnumbered-exit/reports/2026-07-10-081500-generation.md"
+awk '
+  /^## Validazione$/ { print; print ""; print "Comando: `bash scripts/validate-workspace.sh \"$WORKSPACE_ROOT\"`."; print ""; print "Esito in corso; exit code non ancora registrato."; skip = 1; next }
+  skip && /^## / { skip = 0 }
+  !skip { print }
+' "$dynamic_report" > "$dynamic_report.tmp"
+mv "$dynamic_report.tmp" "$dynamic_report"
+run_dynamic_invalid validation-with-unnumbered-exit 'validation section must record PASS/FAIL or an exit code' 'validation with unnumbered exit code'
+
 create_dynamic_workspace dirty-without-provenance
 dynamic_report="$runtime_test_root/dirty-without-provenance/reports/2026-07-10-081500-generation.md"
 awk '{ sub(/Stato fabbrica: `clean`/, "Stato fabbrica: `dirty`"); print }' "$dynamic_report" > "$dynamic_report.tmp"
@@ -126,6 +137,21 @@ run_dynamic_invalid symlinked-workspace-file 'workspace contains symlink(s)' 'wo
 create_dynamic_workspace unsafe-api-ingestion
 printf '\nIl task usa API fetch da un endpoint remoto.\n' >> "$runtime_test_root/unsafe-api-ingestion/README.md"
 run_dynamic_invalid unsafe-api-ingestion 'must positively classify external content' 'unsafe external API ingestion'
+
+link_test_root="$runtime_test_root/markdown-links"
+mkdir -p "$link_test_root/docs"
+printf '# Link test\n\n[Valid](docs/target.md)\n' > "$link_test_root/README.md"
+printf '# Target\n' > "$link_test_root/docs/target.md"
+if python3 "$LINK_CHECKER" "$link_test_root" >/dev/null 2>&1; then
+  pass 'repository link checker accepts resolving local links'
+else
+  fail 'repository link checker rejected a resolving local link'
+fi
+printf '\n[Broken](docs/missing.md)\n' >> "$link_test_root/README.md"
+output="$(python3 "$LINK_CHECKER" "$link_test_root" 2>&1)"
+rc=$?
+if [ "$rc" -ne 0 ]; then pass 'repository link checker rejects broken links'; else fail 'broken local link should fail'; fi
+assert_contains "$output" 'missing local target: docs/missing.md' 'broken local link has actionable evidence'
 
 duplicate_factory="$runtime_test_root/factory-duplicate-index"
 cp -R "$ROOT" "$duplicate_factory"

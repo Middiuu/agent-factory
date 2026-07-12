@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "eval_id": 3,
+  "eval_name": "two-updates",
+  "configuration": "with_skill",
+  "run_number": 1,
+  "prompt": "Aggiorna due volte nello stesso giorno un workspace research esistente: prima aggiungi un formato executive summary, poi un controllo di qualità delle fonti. Preserva report e discovery precedenti.",
+  "status": "passed",
+  "method": "rubric_hidden_with_skill",
+  "started_at_utc": "2026-07-11T07:43:27Z",
+  "completed_at_utc": "2026-07-11T07:51:22Z",
+  "source_fixture": "skills/agent-workspace-builder/evals/files/research-seed",
+  "artifacts": [
+    "transcript.md",
+    "outputs/workspace/AGENTS.md",
+    "outputs/workspace/README.md",
+    "outputs/workspace/RESEARCH.md",
+    "outputs/workspace/reports/2026-07-10-225424-generation.md",
+    "outputs/workspace/reports/2026-07-11-074416-update.md",
+    "outputs/workspace/reports/2026-07-11-074613-update.md",
+    "outputs/workspace/skills/web-research/SKILL.md"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh \"$TARGET_WORKSPACE\"",
+    "result": "PASS",
+    "exit_code": 0,
+    "steps": [
+      {
+        "step": 1,
+        "name": "add-executive-summary-format",
+        "report": "outputs/workspace/reports/2026-07-11-074416-update.md",
+        "report_timestamp_utc": "2026-07-11T07:44:16Z",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "report-in-progress",
+            "command": "bash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+            "result": "PASS",
+            "exit_code": 0,
+            "observed_at_utc": "2026-07-11T07:45:10Z"
+          },
+          {
+            "attempt": 2,
+            "phase": "report-finalized",
+            "command": "bash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+            "result": "PASS",
+            "exit_code": 0
+          }
+        ],
+        "final_result": "PASS",
+        "final_exit_code": 0
+      },
+      {
+        "step": 2,
+        "name": "add-source-quality-control",
+        "report": "outputs/workspace/reports/2026-07-11-074613-update.md",
+        "report_timestamp_utc": "2026-07-11T07:46:13Z",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "report-in-progress",
+            "command": "bash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+            "result": "PASS",
+            "exit_code": 0,
+            "observed_at_utc": "2026-07-11T07:47:24Z"
+          },
+          {
+            "attempt": 2,
+            "phase": "report-finalized",
+            "command": "bash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+            "result": "PASS",
+            "exit_code": 0,
+            "observed_at_utc": "2026-07-11T07:47:56Z"
+          }
+        ],
+        "final_result": "PASS",
+        "final_exit_code": 0
+      },
+      {
+        "step": 3,
+        "name": "validate-packaged-workspace",
+        "attempts": [
+          {
+            "attempt": 1,
+            "phase": "packaged-copy-check",
+            "command": "bash scripts/validate-workspace.sh \"$TARGET_WORKSPACE\"",
+            "result": "PASS",
+            "exit_code": 0,
+            "observed_at_utc": "2026-07-11T07:48:26Z"
+          },
+          {
+            "attempt": 2,
+            "phase": "final-artifact-check",
+            "command": "bash scripts/validate-workspace.sh \"$TARGET_WORKSPACE\"",
+            "result": "PASS",
+            "exit_code": 0,
+            "observed_at_utc": "2026-07-11T07:51:22Z"
+          }
+        ],
+        "final_result": "PASS",
+        "final_exit_code": 0
+      }
+    ],
+    "non_validator_checks": {
+      "update_1_initial_regex_check": "FAIL due to an over-restrictive local assertion; corrected after direct inspection",
+      "update_2_semantic_check": "PASS",
+      "final_semantic_check": "PASS",
+      "preservation_check": "PASS",
+      "packaged_manifest_compare": "IDENTICAL"
+    }
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "manifest_format": "sorted lines of <file_sha256>  ./<relative_path>",
+    "baseline_manifest": "a0773fc63ae29211ff93446dfeae5c9586643ce9a0ac203dd2aaa2d3e8eaa9ef",
+    "after_update_1_manifest": "6c2e64024fc4242e81910912a32aef8965e6dca8949e8ae8e4bfd578c9a53601",
+    "final_manifest": "4e0da3fd796234ba5f2d41673c4ef2885dc13db6c58bb0009a439eb16201c512",
+    "packaged_manifest": "4e0da3fd796234ba5f2d41673c4ef2885dc13db6c58bb0009a439eb16201c512",
+    "preserved_files": {
+      "RESEARCH.md": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+      "reports/2026-07-10-225424-generation.md": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+      "reports/2026-07-11-074416-update.md_after_step_1_and_final": "9b7637c9f41026399bc528fa86df32b739f1d3eeb47f8e32ff2537d94106d919"
+    },
+    "final_files": {
+      "README.md": "35d5b939134ae5f7e6ff34b775004fd5769e70cc66ea8d35e05c22ae35b88f11",
+      "AGENTS.md": "43b141fe925bc14ceb4cfbaf1b2715a85a5d8cc2c3a22bb55d85a32b4a927dce",
+      "skills/web-research/SKILL.md": "ecda929b987759766261cdfc47e19aabf25006c5c35a1035180ca2a1ca138df6",
+      "reports/2026-07-11-074613-update.md": "7d4c63ddbb8cb107562cc66ed86aef365db8b083e707e7cf6d23222f91796e78"
+    }
+  },
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read"
+}

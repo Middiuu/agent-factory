@@ -1,0 +1,109 @@
+{
+  "expectations": [
+    {
+      "text": "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+      "passed": true,
+      "evidence": "I due soli report di update, reports/2026-07-10-225933-update.md e reports/2026-07-10-230043-update.md, contengono ciascuno esattamente una sezione `## Executive summary`. Entrambi applicano anche i quattro punti richiesti da AGENTS.md: risultato, evidenze chiave, rischi o incertezze e prossima azione."
+    },
+    {
+      "text": "Dopo il secondo update, README o AGENTS definisce un gate verificabile per provenienza, recenza, supporto diretto, indipendenza o corroborazione e gestione delle fonti incerte o scartate",
+      "passed": true,
+      "evidence": "AGENTS.md richiede per ogni fonte URL, claim, tipo, autorevolezza, recenza, indipendenza, esito e motivazione. I gate verificano provenienza identificabile e supporto diretto, adeguatezza temporale e una fonte primaria pertinente oppure due fonti indipendenti; in caso di fallimento prescrivono `[incerto]` o scarto e mantengono espliciti i conflitti."
+    },
+    {
+      "text": "I due report di update hanno nomi univoci e non si sovrascrivono",
+      "passed": true,
+      "evidence": "La directory reports contiene i due file distinti 2026-07-10-225933-update.md e 2026-07-10-230043-update.md. I timestamp interni 2026-07-10T22:59:33Z e 2026-07-10T23:00:43Z corrispondono ai nomi e ricadono nello stesso giorno UTC."
+    },
+    {
+      "text": "I report storici restano invariati",
+      "passed": true,
+      "evidence": "Il grader ha verificato con cmp che reports/2026-07-10-225424-generation.md è byte-identico al seed, SHA-256 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0. run.json registra per il primo report di update lo stesso hash c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8 dopo step 1 e nello stato finale; il ricalcolo sul file finale coincide."
+    },
+    {
+      "text": "RESEARCH.md cresce in append solo se cambia il tooling",
+      "passed": true,
+      "evidence": "Nessun tooling è stato introdotto o modificato: skills/web-research/SKILL.md è byte-identico al seed secondo cmp. Coerentemente RESEARCH.md non è stato esteso ed è byte-identico al seed, con SHA-256 5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad prima, dopo step 1 e nello stato finale."
+    },
+    {
+      "text": "Ogni update modifica soltanto i file necessari",
+      "passed": true,
+      "evidence": "Transcript e report registrano per ciascun update modifiche a README.md e AGENTS.md più il solo nuovo report del ciclo. Il diff finale indipendente rispetto al seed mostra esclusivamente quei due file modificati e i due report aggiunti; RESEARCH.md, skill locale e report di generazione sono identici, e il primo report resta invariato dopo il secondo update."
+    },
+    {
+      "text": "Hash o confronto byte-a-byte dimostrano che i report storici sono rimasti invariati",
+      "passed": true,
+      "evidence": "La verifica indipendente cmp seed/finale termina con exit code 0 per il report di generazione, il cui SHA-256 è 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0. run.json registra per il primo report di update lo stesso SHA-256 c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8 after_step_1 e final; tutti gli hash finali ricalcolati coincidono con run.json."
+    },
+    {
+      "text": "Il validator corrente termina con exit code 0 dopo ciascun update",
+      "passed": true,
+      "evidence": "run.json registra per update 1 e update 2 un esito finale passed con exit code 0 dopo l'aggiunta dei rispettivi report. Il grader ha rieseguito il validator corrente sul workspace finale: output conclusivo `Validation passed.` ed exit code 0."
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": null,
+    "total_steps": 2,
+    "errors_encountered": 0,
+    "output_chars": 15454,
+    "transcript_chars": 5365
+  },
+  "timing": null,
+  "claims": [
+    {
+      "claim": "Entrambi i nuovi report applicano il formato executive summary introdotto dal primo update.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Entrambi i report contengono `## Executive summary` e i quattro punti ordinati richiesti da AGENTS.md."
+    },
+    {
+      "claim": "Il controllo qualità collega provenienza, supporto, recenza e indipendenza a decisioni operative sui claim.",
+      "type": "quality",
+      "verified": true,
+      "evidence": "AGENTS.md richiede provenienza identificabile, supporto diretto, data adeguata, fonte primaria o corroborazione indipendente e prescrive `[incerto]` o scarto quando il gate fallisce."
+    },
+    {
+      "claim": "Report storici, discovery e tooling sono preservati.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "cmp indipendente termina 0 per RESEARCH.md, skills/web-research/SKILL.md e il report di generazione rispetto al seed; il primo report di update mantiene lo stesso hash fra after_step_1 e final."
+    },
+    {
+      "claim": "Il workspace finale passa il validator corrente.",
+      "type": "process",
+      "verified": true,
+      "evidence": "Riesecuzione indipendente del grader: `Validation passed.` ed exit code 0; run.json registra inoltre passed/0 dopo entrambi gli update."
+    },
+    {
+      "claim": "Il controlled baseline non ha letto la skill principale, le reference o gli output with_skill.",
+      "type": "process",
+      "verified": false,
+      "evidence": "La dichiarazione compare in transcript.md e run.json, ma non è persistito un log grezzo delle chiamate agli strumenti che permetta al grader di verificarne indipendentemente l'assenza."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+        "reason": "La baseline applica anche i quattro punti richiesti, ma l'assertion potrebbe esplicitare ordine, contenuto e limite per impedire che un semplice heading vuoto o una sezione non conforme ottenga un pass."
+      },
+      {
+        "assertion": "Ogni update modifica soltanto i file necessari",
+        "reason": "run.json conserva hash intermedi ma non lo snapshot completo dopo update 1. Persistire un manifest per-file o la patch intermedia renderebbe indipendente la verifica dello scope del primo ciclo e della preservazione nel secondo."
+      }
+    ],
+    "overall": "Le otto assertion passano, inclusi formato executive, gate fonti, preservazione e validator confermati indipendentemente. Restano migliorabili la profondità del controllo sul formato e la prova dello stato intermedio."
+  }
+}

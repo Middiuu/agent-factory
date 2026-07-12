@@ -150,6 +150,56 @@ http_is_success() {
   [ "$HTTP_RC" -eq 0 ] && printf '%s\n' "$HTTP_STATUS" | grep -Eq '^2[0-9][0-9]$'
 }
 
+response_schema_valid() {
+  local schema="$1"
+
+  command -v python3 >/dev/null 2>&1 || return 1
+  printf '%s\n' "$HTTP_BODY" | python3 -c '
+import json
+import sys
+
+schema = sys.argv[1]
+data = json.load(sys.stdin)
+
+def text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+if schema == "skills":
+    valid = isinstance(data, list) and all(
+        isinstance(item, dict) and text(item.get("name")) for item in data
+    )
+elif schema == "mcp":
+    valid = isinstance(data, dict) and isinstance(data.get("servers"), list) and all(
+        isinstance(item, dict)
+        and isinstance(item.get("server"), dict)
+        and text(item["server"].get("name"))
+        and (item["server"].get("description") is None or isinstance(item["server"].get("description"), str))
+        for item in data.get("servers", [])
+    )
+elif schema == "npm":
+    valid = isinstance(data, dict) and isinstance(data.get("objects"), list) and all(
+        isinstance(item, dict)
+        and isinstance(item.get("package"), dict)
+        and text(item["package"].get("name"))
+        and text(item["package"].get("version"))
+        and (item["package"].get("description") is None or isinstance(item["package"].get("description"), str))
+        for item in data.get("objects", [])
+    )
+elif schema == "pypi":
+    valid = (
+        isinstance(data, dict)
+        and isinstance(data.get("info"), dict)
+        and text(data["info"].get("name"))
+        and text(data["info"].get("version"))
+        and (data["info"].get("summary") is None or isinstance(data["info"].get("summary"), str))
+    )
+else:
+    valid = False
+
+raise SystemExit(0 if valid else 1)
+' "$schema" >/dev/null 2>&1
+}
+
 discover_skills() {
   local source="GitHub skill registry"
   local url="https://api.github.com/repos/anthropics/skills/contents/skills"
@@ -174,8 +224,10 @@ discover_skills() {
     source_unreachable "$source" "$(http_failure_detail)"
     return
   fi
-  source_reachable "$source"
-
+  if ! response_schema_valid skills; then
+    source_unreachable "$source" "JSON non valido o schema inatteso"
+    return
+  fi
   if [ "$HAVE_JQ" -eq 1 ]; then
     if ! printf '%s\n' "$HTTP_BODY" | jq -e 'type == "array"' >/dev/null 2>&1; then
       source_unreachable "$source" "JSON non valido o schema inatteso"
@@ -183,9 +235,14 @@ discover_skills() {
     fi
     names="$(printf '%s\n' "$HTTP_BODY" | jq -r '.[].name' 2>/dev/null || true)"
   else
+    if ! printf '%s\n' "$HTTP_BODY" | grep -Eq '^[[:space:]]*\['; then
+      source_unreachable "$source" "JSON non valido o schema inatteso"
+      return
+    fi
     printf 'jq non disponibile: parsing minimale dei campi name.\n'
     names="$(printf '%s\n' "$HTTP_BODY" | grep -oE '"name"[[:space:]]*:[[:space:]]*"[^"]+"' | sed 's/.*:[[:space:]]*"//; s/"$//' || true)"
   fi
+  source_reachable "$source"
 
   matches="$(printf '%s\n' "$names" | grep -iF -- "$QUERY" || true)"
 
@@ -214,8 +271,10 @@ discover_mcp() {
     source_unreachable "$source" "$(http_failure_detail); l'endpoint /v0.1 potrebbe essere cambiato"
     return
   fi
-  source_reachable "$source"
-
+  if ! response_schema_valid mcp; then
+    source_unreachable "$source" "JSON non valido o schema inatteso"
+    return
+  fi
   if [ "$HAVE_JQ" -eq 1 ]; then
     if ! printf '%s\n' "$HTTP_BODY" | jq -e '.servers | type == "array"' >/dev/null 2>&1; then
       source_unreachable "$source" "JSON non valido o schema inatteso"
@@ -223,9 +282,15 @@ discover_mcp() {
     fi
     results="$(printf '%s\n' "$HTTP_BODY" | jq -r '.servers[].server | "\(.name) — \(.description)"' 2>/dev/null | sort -u || true)"
   else
+    if ! printf '%s\n' "$HTTP_BODY" | grep -Eq '^[[:space:]]*\{' \
+        || ! printf '%s\n' "$HTTP_BODY" | grep -Eq '"servers"[[:space:]]*:'; then
+      source_unreachable "$source" "JSON non valido o schema inatteso"
+      return
+    fi
     printf 'jq non disponibile: risposta JSON grezza (massimo 2000 caratteri).\n'
     results="${HTTP_BODY:0:2000}"
   fi
+  source_reachable "$source"
 
   if [ "$results" != "" ] && [ "$results" != "[]" ] && [ "$results" != '{"servers":[]}' ]; then
     printf '%s\n' "$results"
@@ -273,11 +338,58 @@ discover_npm() {
   local rc
   local query_q
   local encoded
+  local search_url
+  local results=""
   local downloads_url
 
-  command -v npm >/dev/null 2>&1 || return
+  printf '\n### npm\n\n'
+  encoded="$(urlencode "$QUERY")"
+  search_url="https://registry.npmjs.org/-/v1/search?text=${encoded}&size=10"
+  cmd_note "curl --max-time $DISCOVER_TIMEOUT $(shell_quote "$search_url") | jq -r '.objects[].package | \"\\(.name) — \\(.version): \\(.description)\"'"
 
-  printf '\n### npm (pacchetto esatto)\n\n'
+  http_fetch "$search_url" || true
+  if ! http_is_success; then
+    source_unreachable "npm registry" "$(http_failure_detail)"
+    return
+  fi
+  if ! response_schema_valid npm; then
+    source_unreachable "npm registry" "JSON non valido o schema inatteso"
+    return
+  fi
+  if [ "$HAVE_JQ" -eq 1 ]; then
+    if ! printf '%s\n' "$HTTP_BODY" | jq -e '.objects | type == "array"' >/dev/null 2>&1; then
+      source_unreachable "npm registry" "JSON non valido o schema inatteso"
+      return
+    fi
+    results="$(printf '%s\n' "$HTTP_BODY" | jq -r '.objects[].package | "\(.name) — \(.version): \(.description // "")"' 2>/dev/null || true)"
+  else
+    if ! printf '%s\n' "$HTTP_BODY" | grep -Eq '^[[:space:]]*\{' \
+        || ! printf '%s\n' "$HTTP_BODY" | grep -Eq '"objects"[[:space:]]*:'; then
+      source_unreachable "npm registry" "JSON non valido o schema inatteso"
+      return
+    fi
+    printf 'jq non disponibile: parsing minimale dei nomi pacchetto.\n'
+    results="$(printf '%s\n' "$HTTP_BODY" | grep -oE '"name"[[:space:]]*:[[:space:]]*"[^"]+"' | sed 's/.*:[[:space:]]*"//; s/"$//' | awk '!seen[$0]++' | head -10 || true)"
+  fi
+  source_reachable "npm registry"
+
+  if [ "$results" != "" ]; then
+    printf '%s\n' "$results"
+  else
+    no_results "npm registry" "query \"$QUERY\""
+  fi
+
+  if ! printf '%s\n' "$QUERY" | grep -Eq '^(@[A-Za-z0-9._~-]+/)?[A-Za-z0-9._~-]+$'; then
+    printf '\nLookup npm esatto saltato: "%s" e'\'' una query di ricerca, non un nome pacchetto valido.\n' "$QUERY"
+    return
+  fi
+
+  if ! command -v npm >/dev/null 2>&1; then
+    printf '\nLookup npm esatto saltato: comando npm non disponibile nel PATH.\n'
+    return
+  fi
+
+  printf '\n#### npm (pacchetto esatto)\n\n'
   query_q="$(shell_quote "$QUERY")"
   cmd_note "npm --fetch-timeout=$((DISCOVER_TIMEOUT * 1000)) --fetch-retries=0 view -- $query_q name version description"
 
@@ -298,11 +410,10 @@ discover_npm() {
     package_absent "npm" "$QUERY"
     return
   else
-    source_unreachable "npm registry" "errore npm exit $rc (non classificato come assenza)"
+    source_unreachable "npm package lookup" "errore npm exit $rc (non classificato come assenza)"
     return
   fi
 
-  encoded="$(urlencode "$QUERY")"
   downloads_url="https://api.npmjs.org/downloads/point/last-month/${encoded}"
   cmd_note "curl --max-time $DISCOVER_TIMEOUT $(shell_quote "$downloads_url")"
   http_fetch "$downloads_url" || true
@@ -323,22 +434,36 @@ discover_pypi() {
   local encoded
   local url
 
+  printf '\n### PyPI (pacchetto esatto)\n\n'
+  if ! printf '%s\n' "$QUERY" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+    printf 'Lookup PyPI esatto saltato: "%s" e'\'' una query di ricerca, non un nome di distribuzione valido.\n' "$QUERY"
+    return
+  fi
+
   encoded="$(urlencode "$QUERY")"
   url="https://pypi.org/pypi/${encoded}/json"
-
-  printf '\n### PyPI (pacchetto esatto)\n\n'
   cmd_note "curl --max-time $DISCOVER_TIMEOUT $(shell_quote "$url") | jq -r '.info | \"\\(.name) \\(.version) — \\(.summary)\"'"
 
   http_fetch "$url" || true
   if http_is_success; then
-    source_reachable "$source"
+    if ! response_schema_valid pypi; then
+      source_unreachable "$source" "JSON non valido o schema inatteso"
+      return
+    fi
     if [ "$HAVE_JQ" -eq 1 ]; then
       if ! printf '%s\n' "$HTTP_BODY" | jq -e '.info.name and .info.version' >/dev/null 2>&1; then
         source_unreachable "$source" "JSON non valido o schema inatteso"
         return
       fi
+      source_reachable "$source"
       printf '%s\n' "$HTTP_BODY" | jq -r '.info | "\(.name) \(.version) — \(.summary)"' 2>/dev/null
     else
+      if ! printf '%s\n' "$HTTP_BODY" | grep -Eq '^[[:space:]]*\{' \
+          || ! printf '%s\n' "$HTTP_BODY" | grep -Eq '"info"[[:space:]]*:'; then
+        source_unreachable "$source" "JSON non valido o schema inatteso"
+        return
+      fi
+      source_reachable "$source"
       printf 'Pacchetto trovato (jq assente; dettagli nella risposta JSON).\n'
     fi
   elif [ "$HTTP_STATUS" = "404" ]; then

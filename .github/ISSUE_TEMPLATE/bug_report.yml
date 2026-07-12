@@ -1,0 +1,39 @@
+name: Segnalazione bug
+description: Segnala un difetto riproducibile nei contratti, validator o workflow.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Grazie per la segnalazione. Non includere segreti o dati di workspace reali.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: Descrivi il comportamento osservato e quello atteso.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Riproduzione minima
+      description: Elenca comandi, input sintetici e passaggi necessari.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revisione della fabbrica
+      description: Commit Git e stato clean/dirty, se disponibili.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidenza
+      description: Incolla output sanitizzato, exit code e ambiente rilevante.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Controllo dati
+      options:
+        - label: Ho rimosso segreti, path locali e dettagli identificanti dei progetti.
+          required: true

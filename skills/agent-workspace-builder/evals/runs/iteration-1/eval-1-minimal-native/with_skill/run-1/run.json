@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "eval_id": 1,
+  "eval_name": "minimal-native",
+  "configuration": "with_skill",
+  "run_number": 1,
+  "prompt": "Crea un workspace minimale per un agente che rinomina e organizza file Markdown locali. Il coding agent ha già capacità native sufficienti e non servono tool esterni.",
+  "status": "passed",
+  "method": "rubric_hidden_with_skill",
+  "started_at_utc": "2026-07-11T07:43:23Z",
+  "completed_at_utc": "2026-07-11T07:51:49Z",
+  "artifacts": [
+    "outputs/workspace",
+    "transcript.md",
+    "run.json"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh skills/agent-workspace-builder/evals/runs/iteration-1/eval-1-minimal-native/with_skill/run-1/outputs/workspace",
+    "result": "passed",
+    "exit_code": 0,
+    "attempts": [
+      {
+        "scope": "temporary workspace",
+        "command": "FACTORY_ROOT=\"../Agent Factory\"\\nWORKSPACE_ROOT=\".\"\\nbash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+        "result": "failed",
+        "exit_code": 1,
+        "observed": "five report issues: factory status syntax plus four provenance paths parsed as missing internal references"
+      },
+      {
+        "scope": "temporary workspace after first correction",
+        "command": "FACTORY_ROOT=\"../Agent Factory\"\\nWORKSPACE_ROOT=\".\"\\nbash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+        "result": "failed",
+        "exit_code": 1,
+        "observed": "one report issue: factory status syntax"
+      },
+      {
+        "scope": "temporary workspace after second correction",
+        "command": "FACTORY_ROOT=\"../Agent Factory\"\\nWORKSPACE_ROOT=\".\"\\nbash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+        "result": "passed",
+        "exit_code": 0
+      },
+      {
+        "scope": "temporary workspace final content",
+        "command": "FACTORY_ROOT=\"../Agent Factory\"\\nWORKSPACE_ROOT=\".\"\\nbash \"$FACTORY_ROOT/scripts/validate-workspace.sh\" \"$WORKSPACE_ROOT\"",
+        "result": "passed",
+        "exit_code": 0
+      },
+      {
+        "scope": "outputs/workspace",
+        "command": "bash scripts/validate-workspace.sh skills/agent-workspace-builder/evals/runs/iteration-1/eval-1-minimal-native/with_skill/run-1/outputs/workspace",
+        "result": "passed",
+        "exit_code": 0
+      }
+    ]
+  },
+  "semantic_checklist": {
+    "result": "passed",
+    "exit_code": 0,
+    "observed": "structure, minimality, native coverage, safety boundaries, references, commands, provenance, placeholder scan, absolute-path scan, and secret scan passed"
+  },
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read"
+}

@@ -16,6 +16,10 @@ Stato fabbrica: `{{FACTORY_STATUS}}`
 
 {{FACTORY_DIRTY_DETAILS}}
 
+## Executive summary
+
+{{EXECUTIVE_SUMMARY}}
+
 ## Obiettivo dell'aggiornamento
 
 {{USER_GOAL}}

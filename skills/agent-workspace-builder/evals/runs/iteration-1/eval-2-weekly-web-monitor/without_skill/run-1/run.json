@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "eval_id": 2,
+  "eval_name": "weekly-web-monitor",
+  "configuration": "without_skill",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read",
+  "run_number": 1,
+  "prompt": "Genera un agente di monitoraggio web settimanale con log, confronto dei cambiamenti e notifiche solo dopo conferma. Non configurare credenziali o scheduler globali.",
+  "started_at_utc": null,
+  "start_time_status": "not_observed",
+  "start_time_note": "L'istante di avvio non è stato osservato; nessun valore è stato ricostruito.",
+  "completed_at_utc": "2026-07-10T22:47:51Z",
+  "timing_note": "L'avvio originario della baseline parziale non era stato catturato; non è stato ricostruito dal timestamp del report. Il completamento è il timestamp UTC osservato durante la finalizzazione degli artifact.",
+  "status": "passed",
+  "artifacts": [
+    "outputs/workspace",
+    "transcript.md"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh 'skills/agent-workspace-builder/evals/runs/iteration-1/eval-2-weekly-web-monitor/without_skill/run-1/outputs/workspace'",
+    "result": "PASS",
+    "exit_code": 0,
+    "attempts": [
+      {
+        "attempt": 1,
+        "started_at_utc": "2026-07-10T22:45:06Z",
+        "completed_at_utc": "2026-07-10T22:45:07Z",
+        "result": "FAIL",
+        "exit_code": 1,
+        "observed": "Il validator ha riportato 2 issue: formato del commit factory e disclosure/path per lo stato dirty."
+      },
+      {
+        "attempt": 2,
+        "started_at_utc": "2026-07-10T22:45:54Z",
+        "completed_at_utc": "2026-07-10T22:45:55Z",
+        "result": "PASS",
+        "exit_code": 0,
+        "observed": "Validation passed dopo la correzione della provenienza nel report."
+      },
+      {
+        "attempt": 3,
+        "started_at_utc": "2026-07-10T22:46:56Z",
+        "completed_at_utc": "2026-07-10T22:46:57Z",
+        "result": "PASS",
+        "exit_code": 0,
+        "observed": "Validation passed sullo stato finale del workspace dopo l'aggiornamento degli esiti nel report."
+      }
+    ]
+  },
+  "semantic_checks": [
+    {
+      "name": "offline_application_tests",
+      "command": "PYTHONPATH=src python3 -m unittest discover -s tests -v",
+      "started_at_utc": "2026-07-10T22:45:49Z",
+      "completed_at_utc": "2026-07-10T22:45:50Z",
+      "result": "PASS",
+      "exit_code": 0,
+      "observed": "5 test superati; i test usano fetcher deterministici e non effettuano rete o invii."
+    },
+    {
+      "name": "cli_help",
+      "command": "PYTHONPATH=src python3 -m weekly_web_monitor --help",
+      "started_at_utc": "2026-07-10T22:45:49Z",
+      "completed_at_utc": "2026-07-10T22:45:50Z",
+      "result": "PASS",
+      "exit_code": 0,
+      "observed": "Help della CLI stampato correttamente nello stesso batch osservato; nessuna rete o notifica eseguita."
+    }
+  ],
+  "method": "controlled_baseline",
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable"
+}

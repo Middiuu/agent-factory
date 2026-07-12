@@ -602,7 +602,7 @@ check_generation_report() {
   else
     fail "$rel validation section must record an exact command"
   fi
-  if section_has_pattern "$file" "$validation_heading" '(pass|fail|exit[ -]?(code|status)|rc[[:space:]]*[:=][[:space:]]*[0-9]+)'; then
+  if section_has_pattern "$file" "$validation_heading" '(pass|fail|exit[ -]?(code|status)[[:space:]`:=-]*[0-9]+|rc[[:space:]]*[:=][[:space:]]*[0-9]+)'; then
     pass "$rel validation section records an observable outcome"
   else
     fail "$rel validation section must record PASS/FAIL or an exit code"

@@ -1,0 +1,17 @@
+{
+  "eval_id": 1,
+  "eval_name": "minimal-native",
+  "prompt": "Crea un workspace minimale per un agente che rinomina e organizza file Markdown locali. Il coding agent ha già capacità native sufficienti e non servono tool esterni.",
+  "expected_output": "Workspace valido senza skill locale artificiale né RESEARCH.md, con copertura documentata in AGENTS.md e report univoco.",
+  "assertions": [
+    "La directory skills/ può essere vuota senza causare una skill duplicata",
+    "Il report usa un nome con data e timestamp",
+    "La discovery non applicabile è motivata nel report",
+    "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+    "RESEARCH.md è omesso perché non esiste un gap di capacità da investigare",
+    "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+    "Il workflow individua, aggiorna e verifica i collegamenti Markdown relativi interessati dagli spostamenti",
+    "README contiene una sezione di validazione con un comando autonomo ripetibile",
+    "Il workflow resta nella directory autorizzata, non segue symlink, non elimina file e limita le modifiche di contenuto ai collegamenti relativi necessari"
+  ]
+}

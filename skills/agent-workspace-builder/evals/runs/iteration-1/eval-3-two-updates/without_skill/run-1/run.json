@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "eval_id": 3,
+  "eval_name": "two-updates",
+  "configuration": "without_skill",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read",
+  "run_number": 1,
+  "prompt": "Aggiorna due volte nello stesso giorno un workspace research esistente: prima aggiungi un formato executive summary, poi un controllo di qualità delle fonti. Preserva report e discovery precedenti.",
+  "status": "passed",
+  "method": "controlled_baseline",
+  "started_at_utc": "2026-07-10T22:58:52Z",
+  "finished_at_utc": "2026-07-10T23:03:26Z",
+  "verified_at_utc": "2026-07-10T23:03:26Z",
+  "source_fixture": "skills/agent-workspace-builder/evals/files/research-seed",
+  "artifacts": [
+    "transcript.md",
+    "outputs/workspace/AGENTS.md",
+    "outputs/workspace/README.md",
+    "outputs/workspace/RESEARCH.md",
+    "outputs/workspace/reports/2026-07-10-225424-generation.md",
+    "outputs/workspace/reports/2026-07-10-225933-update.md",
+    "outputs/workspace/reports/2026-07-10-230043-update.md",
+    "outputs/workspace/skills/web-research/SKILL.md"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh skills/agent-workspace-builder/evals/runs/iteration-1/eval-3-two-updates/without_skill/run-1/outputs/workspace",
+    "steps": [
+      {
+        "step": 1,
+        "name": "executive_summary",
+        "attempts": [
+          {
+            "started_at_utc": "2026-07-10T22:59:30Z",
+            "finished_at_utc": "2026-07-10T22:59:30Z",
+            "exit_code": 0,
+            "result": "passed_pre_report"
+          },
+          {
+            "started_at_utc": "2026-07-10T23:00:11Z",
+            "finished_at_utc": "2026-07-10T23:00:11Z",
+            "exit_code": 0,
+            "result": "passed"
+          }
+        ],
+        "final": {
+          "started_at_utc": "2026-07-10T23:00:11Z",
+          "finished_at_utc": "2026-07-10T23:00:11Z",
+          "exit_code": 0,
+          "result": "passed"
+        }
+      },
+      {
+        "step": 2,
+        "name": "source_quality_control",
+        "attempts": [
+          {
+            "started_at_utc": "2026-07-10T23:00:39Z",
+            "finished_at_utc": "2026-07-10T23:00:39Z",
+            "exit_code": 0,
+            "result": "passed_pre_report"
+          },
+          {
+            "started_at_utc": "2026-07-10T23:01:15Z",
+            "finished_at_utc": "2026-07-10T23:01:15Z",
+            "exit_code": 0,
+            "result": "passed"
+          }
+        ],
+        "final": {
+          "started_at_utc": "2026-07-10T23:01:15Z",
+          "finished_at_utc": "2026-07-10T23:01:15Z",
+          "exit_code": 0,
+          "result": "passed"
+        }
+      }
+    ],
+    "final": {
+      "started_at_utc": "2026-07-10T23:01:15Z",
+      "finished_at_utc": "2026-07-10T23:01:15Z",
+      "exit_code": 0,
+      "result": "passed"
+    }
+  },
+  "hashes": {
+    "algorithm": "sha256",
+    "recorded_at_utc": "2026-07-10T23:01:25Z",
+    "pre_update": {
+      "outputs/workspace/RESEARCH.md": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+      "outputs/workspace/reports/2026-07-10-225424-generation.md": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+      "outputs/workspace/skills/web-research/SKILL.md": "9300b77b3681a39719bd563aaa2a30806ad05059cb1f239b56a2f044910269a7"
+    },
+    "after_step_1": {
+      "outputs/workspace/AGENTS.md": "028a712f4963838318c4ad1b3c7f7de735255a934b12abb467ae4058b046f4be",
+      "outputs/workspace/README.md": "07c7f3d95f1059079a38d8544a95fa285726ed77bb97c075319e1621026f8516",
+      "outputs/workspace/RESEARCH.md": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+      "outputs/workspace/reports/2026-07-10-225424-generation.md": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+      "outputs/workspace/reports/2026-07-10-225933-update.md": "c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8",
+      "outputs/workspace/skills/web-research/SKILL.md": "9300b77b3681a39719bd563aaa2a30806ad05059cb1f239b56a2f044910269a7"
+    },
+    "final": {
+      "outputs/workspace/AGENTS.md": "ca737414f13ffe68b0ec39b1f63e29feebfc20fc1bb92d151d055ddcce0ff1cf",
+      "outputs/workspace/README.md": "c16e796bfb5a0bc56713c9d3021cbc93f340e5750dac80f11be0868d1fb8219e",
+      "outputs/workspace/RESEARCH.md": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+      "outputs/workspace/reports/2026-07-10-225424-generation.md": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+      "outputs/workspace/reports/2026-07-10-225933-update.md": "c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8",
+      "outputs/workspace/reports/2026-07-10-230043-update.md": "d3380b599397716b5a2da9b4ed4e66012cfe0e6da08a18a88fe4aee026579eca",
+      "outputs/workspace/skills/web-research/SKILL.md": "9300b77b3681a39719bd563aaa2a30806ad05059cb1f239b56a2f044910269a7"
+    },
+    "integrity_checks": [
+      {
+        "path": "outputs/workspace/RESEARCH.md",
+        "pre_update_sha256": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+        "final_sha256": "5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad",
+        "byte_identical": true
+      },
+      {
+        "path": "outputs/workspace/reports/2026-07-10-225424-generation.md",
+        "pre_update_sha256": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+        "final_sha256": "09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0",
+        "byte_identical": true
+      },
+      {
+        "path": "outputs/workspace/reports/2026-07-10-225933-update.md",
+        "after_step_1_sha256": "c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8",
+        "final_sha256": "c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8",
+        "byte_identical_after_step_1": true
+      },
+      {
+        "path": "outputs/workspace/skills/web-research/SKILL.md",
+        "pre_update_sha256": "9300b77b3681a39719bd563aaa2a30806ad05059cb1f239b56a2f044910269a7",
+        "final_sha256": "9300b77b3681a39719bd563aaa2a30806ad05059cb1f239b56a2f044910269a7",
+        "byte_identical": true
+      }
+    ]
+  },
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable"
+}

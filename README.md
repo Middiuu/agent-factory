@@ -1,10 +1,15 @@
 # agent-factory
 
+[![Validate](https://github.com/Middiuu/agent-factory/actions/workflows/validate.yml/badge.svg?branch=main)](https://github.com/Middiuu/agent-factory/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 **agent-factory** è un Agent Workspace Builder Markdown-first: guida un coding agent nella generazione o nell'aggiornamento di workspace agentici specifici per progetto.
 
 Non è un agente finale e non contiene runtime applicativo. La logica vive in istruzioni versionate; gli script shell e la CI sono tooling strumentale per discovery, validazione e governance.
 
 Principi: minimale, verificabile, provider-aware senza dipendere da un singolo client, skill-driven quando serve, MCP/CLI-ready e safe by design. In caso di dubbio: meno file, meno tool, meno codice.
+
+Il repository pubblico corrente è [Middiuu/agent-factory](https://github.com/Middiuu/agent-factory). La linea pubblica è stata ricreata il 2026-07-10 a partire dal commit radice `5b4ea50`; la pubblicazione e il primo gate CI sono documentati nel [report post-pubblicazione](reports/2026-07-10-remote-publication.md).
 
 ## Prerequisiti e permessi
 
@@ -12,7 +17,7 @@ Minimo necessario:
 
 - un coding agent capace di leggere `AGENTS.md`, oppure istruito esplicitamente a farlo;
 - accesso in lettura alla fabbrica e scrittura nella destinazione del workspace;
-- Bash, Git e utility Unix di base;
+- Bash, Git, Python 3 e utility Unix di base;
 - `curl` per la discovery di rete; `jq` è consigliato ma la discovery degrada senza;
 - npm o Homebrew solo quando sono già presenti e pertinenti alla query.
 
@@ -85,6 +90,7 @@ Lo script:
 - applica timeout a ogni fonte o comando esterno;
 - distingue fonte irraggiungibile, HTTP fallito, zero risultati e pacchetto assente;
 - interroga registry di skill e MCP, PATH, Homebrew, npm e PyPI quando disponibili;
+- usa la ricerca npm per query libere e limita i lookup esatti npm/PyPI ai nomi di pacchetto validi;
 - stampa comandi quotati e riproducibili per `RESEARCH.md`.
 
 I risultati sono candidati, non decisioni. Le skill già installate nel client vanno verificate separatamente. Una discovery banale o non applicabile può restare nel report; `RESEARCH.md` serve quando il confronto è non banale.
@@ -96,7 +102,9 @@ Le configurazioni MCP persistenti devono usare versioni esatte e dipendenze loca
 - `templates/` contiene basi compilabili con placeholder canonici `{{UPPER_CASE}}`.
 - `examples/` contiene quattro fixture sintetiche complete: research, web dev, mobile dev e automation.
 
-Le fixture servono a CI e regressione per struttura, riferimenti, safety, discovery e report. Non sono configurazioni production, non installano scheduler o SDK e non provano che un tool esterno sia adatto a un progetto reale. Vanno adattate e sottoposte alla checklist.
+Le fixture servono a CI e regressione per struttura, riferimenti, safety, discovery e report. Nel collaudo corrente automation ha prodotto una baseline live su target pubblici sintetici, web dev ha completato lint/test/build su un'app React effimera e research ha verificato fetch e hash su fonti ufficiali. Mobile ha invece registrato correttamente l'assenza di Flutter/ADB e di un simulatore utilizzabile, senza simulare build o device.
+
+Restano esempi sintetici, non configurazioni production né evidenze valide per promuovere un blueprint. Vanno adattati a un progetto reale e sottoposti alla checklist.
 
 ## Quality gate a due strati
 
@@ -106,15 +114,35 @@ Gate meccanici:
 bash scripts/validate-factory.sh
 bash scripts/test-validators.sh
 bash scripts/test-discover.sh
+bash scripts/check-repo-links.sh
+bash scripts/validate-evals.sh
+bash scripts/test-evals.sh
 bash scripts/validate-workspace.sh <workspace-path>
 bash scripts/lessons-ledger.sh validate
 ```
 
-I test includono fixture positive, casi negativi isolati, link/symlink confinati, provenance report, timestamp calendariali, history append-only e mock deterministici della rete. Il gate della fabbrica scansiona inoltre path macchina-specifici e segreti fuori dalle fixture negative intenzionali. Il verde shell è necessario ma non sufficiente.
+I test includono fixture positive, casi negativi isolati, link/symlink confinati, provenance report, timestamp calendariali, history append-only e mock deterministici della rete. Il gate della fabbrica scansiona inoltre path macchina-specifici, segreti, JSON e link locali fuori dalle fixture negative intenzionali. La CI esegue qualità statica su Ubuntu, il gate completo su Ubuntu e macOS e uno smoke live settimanale separato; quest'ultimo è ripetibile manualmente con `bash scripts/test-live-discovery.sh`. Il verde shell è necessario ma non sufficiente.
 
 Il secondo strato è `skills/agent-workspace-builder/references/post-generation-checklist.md`: verifica obiettivo, setup, coerenza README/AGENTS, discovery, comandi reali, file extra, output e report. Un fallimento semantico prevale su un validator verde.
 
 Per mantenere il validator indipendente da librerie linguistiche, le intestazioni strutturali dei template restano canoniche in italiano; un workspace interamente inglese può usare gli equivalenti inglesi riconosciuti. Il testo sotto le intestazioni segue invece la lingua dell'utente.
+
+## Eval della skill
+
+`skills/agent-workspace-builder/evals/evals.json` definisce tre scenari: capacità native minime, automation web sicura e due update incrementali. Il protocollo richiede esecuzioni con e senza skill sullo stesso prompt/input e senza mostrare le rubriche; run e transcript lo auto-attestano, ma l'assenza di trace raw non consente una verifica indipendente dell'isolamento. Transcript, output, grading, benchmark e viewer restano sotto `evals/runs/iteration-1/`; il manifest canonico degli hash vive in `evals/results/`.
+
+Riproduzione del gate persistito:
+
+```bash
+bash scripts/validate-evals.sh
+bash scripts/test-evals.sh
+```
+
+Per rigenerare benchmark e viewer offline dalle evidenze già graduate, usa
+`scripts/build-eval-artifacts.sh` come documentato in
+`skills/agent-workspace-builder/evals/README.md`.
+
+Le metriche e gli identificatori di modello non esposti per run non vengono ricostruiti. Una singola run per configurazione misura la copertura degli scenari, non la varianza statistica; i transcript sono resoconti persistiti, non trace raw del provider. Le fixture eval restano sintetiche e non contano nel ledger delle generazioni reali.
 
 ## Report e memoria
 
@@ -134,11 +162,11 @@ Nella fabbrica vivono soltanto:
 
 ## Privacy e storia Git
 
-La policy corrente vieta alla fabbrica nomi, obiettivi, percorsi, URL, dati o dettagli dei progetti generati.
+La policy corrente vieta alla fabbrica nomi, obiettivi, percorsi, URL, dati o dettagli dei progetti generati. Esempi, fixture ed eval persistiti usano esclusivamente casi sintetici dichiarati.
 
-La ricreazione locale del repository prevista al termine del refactor stabilisce una nuova history conforme e rimuove la vecchia linea dalla copia locale. Non implica che un remoto, fork, cache o clone precedente sia risanato. Finché la nuova history non viene pubblicata con un force-push coordinato e verificata, i commit precedenti possono restare recuperabili altrove.
+Il 2026-07-10 il precedente repository remoto è stato eliminato e il repository pubblico omonimo è stato ricreato. La nuova `main`, inizializzata dal commit radice `5b4ea50`, è stata pubblicata e verificata con CI verde. La migrazione ha sostituito la linea visibile nell'origin corrente; non può eliminare o attestare copie autonome già presenti in fork, cache o cloni esterni.
 
-La pubblicazione della history sostitutiva è un'operazione separata e distruttiva: non è un effetto automatico del builder.
+La sostituzione di una history resta un'operazione amministrativa separata e distruttiva: non è e non diventa un effetto automatico del builder.
 
 ## Governance e contribuzione
 
@@ -159,6 +187,8 @@ Prima di contribuire:
 
 `AGENTS.md` e la skill principale richiedono sempre una richiesta utente esplicita e specifica.
 
+Per proporre modifiche consulta [CONTRIBUTING.md](CONTRIBUTING.md). Problemi di sicurezza vanno comunicati secondo [SECURITY.md](SECURITY.md); la partecipazione al progetto segue [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Le modifiche pubbliche rilevanti sono riassunte in [CHANGELOG.md](CHANGELOG.md).
+
 ## Versioning
 
 Non esiste un package runtime con SemVer. La versione operativa è il commit Git della fabbrica, accompagnato da stato clean/dirty nei report. Evoluzioni generali devono essere commit dedicati e revisionabili; un worktree dirty impedisce modifiche di governance.
@@ -173,6 +203,10 @@ Non esiste un package runtime con SemVer. La versione operativa è il commit Git
 - `examples/` — fixture sintetiche complete.
 - `scripts/` — discovery, validator, test e ledger.
 - `reports/` — memoria generalizzata e snapshot descrittivi.
+- `CONTRIBUTING.md` — flusso di contribuzione e gate richiesti.
+- `SECURITY.md` — ambito e canale di segnalazione delle vulnerabilità.
+- `CODE_OF_CONDUCT.md` — regole di partecipazione e moderazione.
+- `CHANGELOG.md` — cronologia pubblica delle modifiche rilevanti.
 
 ## Licenza
 

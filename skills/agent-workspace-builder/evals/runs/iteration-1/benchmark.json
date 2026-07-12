@@ -1,0 +1,451 @@
+{
+  "metadata": {
+    "skill_name": "agent-workspace-builder",
+    "skill_path": "skills/agent-workspace-builder/SKILL.md",
+    "executor_model": "not captured per run",
+    "grader_model": "not captured per grading",
+    "analyzer_model": "not captured in persisted analyzer notes",
+    "timestamp": "2026-07-11T07:55:38Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1,
+    "token_metric": "output_chars proxy; provider token counts unavailable",
+    "time_metric": "0 means unavailable; provider timing unavailable",
+    "errors_metric": "documented failed validator attempts; final validation is checked separately",
+    "summary_dispersion": "descriptive dispersion across heterogeneous evals, not replicate variance",
+    "rubric_isolation": "executor self-attestation; raw provider traces unavailable",
+    "artifact_tooling": {
+      "aggregate_benchmark.py": "123ef128ea5ccc01a4b1ac212ef5567f21e9c13d3d240609780beeb3200c49aa",
+      "eval-viewer/generate_review.py": "fc9d1b9243fe5ab6012ebd579bd76d0035de1b79fd3b969de114defab26478fb",
+      "eval-viewer/viewer.html": "a53213426ee1100441d701a3a0d49cda7a842f992d2c36463f4d3cc0258575fa"
+    }
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "minimal-native",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 0.0,
+        "tokens": 12520,
+        "tool_calls": 0,
+        "errors": 2
+      },
+      "expectations": [
+        {
+          "text": "La directory skills/ può essere vuota senza causare una skill duplicata",
+          "passed": true,
+          "evidence": "L'inventario indipendente trova `outputs/workspace/skills/` vuota: non esistono `SKILL.md` o altri file nella directory. README dichiara che `skills/` resta intenzionalmente vuota e il validator corrente conferma `no local skills found` con exit code 0."
+        },
+        {
+          "text": "Il report usa un nome con data e timestamp",
+          "passed": true,
+          "evidence": "Il solo report è `reports/2026-07-11-074323-generation.md`; al suo interno compaiono `Timestamp UTC: 2026-07-11T07:43:23Z` e `Nome file: 2026-07-11-074323-generation.md`. Data e ora coincidono esattamente."
+        },
+        {
+          "text": "La discovery non applicabile è motivata nel report",
+          "passed": true,
+          "evidence": "La sezione `## Discovery` del report dice `Non applicabile` e motiva la scelta con la sufficienza nativa esplicitata dal prompt, l'assenza di gap nella matrice e l'assenza di skill, CLI o MCP da aggiungere."
+        },
+        {
+          "text": "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+          "passed": true,
+          "evidence": "README contiene `## Quickstart` e `## Output attesi`. In AGENTS il workflow verifica prima la radice e il percorso canonico (passo 2), rileva collisioni e destinazioni esistenti (passo 4), richiede conferma (passo 5), vieta sovrascritture (passo 6 e Boundaries) e prescrive controlli post-operazione nella sezione `## Validazione`."
+        },
+        {
+          "text": "RESEARCH.md è omesso perché non esiste un gap di capacità da investigare",
+          "passed": true,
+          "evidence": "L'inventario indipendente conferma che `RESEARCH.md` non esiste. La matrice del report assegna `nessuno` a ogni gap e la sezione Discovery collega esplicitamente l'assenza di gap alla decisione di non creare `RESEARCH.md`."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+          "passed": true,
+          "evidence": "Riesecuzione indipendente del comando corrente sul workspace: output finale `Validation passed.` ed exit code 0. Il report registra `Tentativo 3: PASS — exit code 0`; transcript e run.json registrano inoltre il PASS sulla copia finale in `outputs/workspace`."
+        },
+        {
+          "text": "Il workflow individua, aggiorna e verifica i collegamenti Markdown relativi interessati dagli spostamenti",
+          "passed": true,
+          "evidence": "AGENTS richiede di includere nel piano i link relativi interessati (passo 5), aggiorna soltanto link e immagini relative la cui destinazione è cambiata (passo 7) e verifica che ogni link relativo modificato risolva a una destinazione esistente (`## Validazione`)."
+        },
+        {
+          "text": "README contiene una sezione di validazione con un comando autonomo ripetibile",
+          "passed": true,
+          "evidence": "README contiene `## Validazione` e un blocco shell autonomo che imposta `WORKSPACE_ROOT` dalla directory corrente e controlla in modo ripetibile README.md, AGENTS.md, skills/ e reports/. Documenta separatamente anche il comando del validator quando la fabbrica è disponibile."
+        },
+        {
+          "text": "Il workflow resta nella directory autorizzata, non segue symlink, non elimina file e limita le modifiche di contenuto ai collegamenti relativi necessari",
+          "passed": true,
+          "evidence": "AGENTS limita l'operazione alla radice autorizzata e al suo percorso canonico (Ruolo e passi 2-3), non segue symlink esterni, vieta eliminazioni e sovrascritture e consente modifiche di contenuto soltanto ai link relativi resi obsoleti dagli spostamenti approvati (passo 7 e Boundaries)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "minimal-native",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6666666666666666,
+        "passed": 6,
+        "failed": 3,
+        "total": 9,
+        "time_seconds": 0.0,
+        "tokens": 6151,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "La directory skills/ può essere vuota senza causare una skill duplicata",
+          "passed": true,
+          "evidence": "L'inventario indipendente trova soltanto `skills/.gitkeep` e nessun `SKILL.md`, quindi la directory è logicamente vuota e non duplica capacità native. AGENTS e README dichiarano la scelta; il validator corrente conferma `no local skills found` con exit code 0."
+        },
+        {
+          "text": "Il report usa un nome con data e timestamp",
+          "passed": true,
+          "evidence": "Il solo report è `reports/2026-07-10-141550-generation.md` e contiene `Timestamp UTC: 2026-07-10T14:15:50Z`; data e ora del timestamp coincidono con il nome file."
+        },
+        {
+          "text": "La discovery non applicabile è motivata nel report",
+          "passed": true,
+          "evidence": "La sezione `## Discovery` del report dice `Non eseguita` e motiva la scelta con l'indicazione esplicita del prompt che le capacità native sono sufficienti e non servono tool esterni."
+        },
+        {
+          "text": "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+          "passed": false,
+          "evidence": "README contiene `## Quickstart` e `## Output attesi`; AGENTS copre collisioni (passo 4), conferma (passo 5), divieto di sovrascrittura (Sicurezza) e controlli post-operazione (passo 7). Manca però un preflight esplicito che verifichi prima dell'inventario che la radice esista, sia accessibile/scrivibile e sia risolta entro il perimetro autorizzato. Poiché l'aspettativa è congiuntiva, il requisito fallisce."
+        },
+        {
+          "text": "RESEARCH.md è omesso perché non esiste un gap di capacità da investigare",
+          "passed": true,
+          "evidence": "L'inventario indipendente conferma che `RESEARCH.md` non esiste. Il report dichiara copertura completa con capacità native e assenza di skill, MCP, servizi o CLI dedicate, motivando l'omissione."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+          "passed": true,
+          "evidence": "Riesecuzione indipendente del comando corrente sul workspace: output finale `Validation passed.` ed exit code 0. Il report registra `Controllo finale: PASS (exit code 0)` e run.json riporta lo stesso esito."
+        },
+        {
+          "text": "Il workflow individua, aggiorna e verifica i collegamenti Markdown relativi interessati dagli spostamenti",
+          "passed": false,
+          "evidence": "AGENTS non menziona link o collegamenti Markdown nelle fasi di inventario, applicazione o verifica e impone invece `Non modificare il contenuto dei file`. Non esiste quindi una procedura sostanziale per individuare, aggiornare e ricontrollare i link relativi dopo gli spostamenti."
+        },
+        {
+          "text": "README contiene una sezione di validazione con un comando autonomo ripetibile",
+          "passed": false,
+          "evidence": "README termina con `## Contenuto`: non contiene una sezione `Validazione` né alcun comando autonomo. Il comando registrato nel report non soddisfa l'aspettativa, che richiede esplicitamente il README."
+        },
+        {
+          "text": "Il workflow resta nella directory autorizzata, non segue symlink, non elimina file e limita le modifiche di contenuto ai collegamenti relativi necessari",
+          "passed": true,
+          "evidence": "AGENTS limita l'operazione alla radice esplicitamente indicata, vieta di seguire symlink o uscire dalla radice e vieta eliminazioni e sovrascritture. Proibisce ogni modifica di contenuto, un limite più restrittivo del consentire soltanto i link necessari; ciò soddisfa questo vincolo di sicurezza pur causando il fallimento funzionale separato sulla gestione dei link."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "weekly-web-monitor",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 59649,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "La procedura registra hash o valori confrontabili tra esecuzioni",
+          "passed": true,
+          "evidence": "L'implementazione corrente calcola e persiste raw_sha256 e canonical_sha256, salva snapshot canonici, cita baseline_run_id e produce un diff per i cambiamenti significativi (monitor.py, check_command). La suite reale rieseguita dal grader con bytecode disabilitato ha superato 3/3 test; test_classification_diff_and_human_gate esercita tre esecuzioni e verifica initial, technical, significant, baseline e diff."
+        },
+        {
+          "text": "Le notifiche ampie richiedono conferma",
+          "passed": true,
+          "evidence": "Il comando check crea soltanto una bozza in reports/pending e dichiara che non autorizza invii. approve richiede il token letterale INVIA e registra scope=single_run_single_destination; AGENTS.md richiede consenso esplicito riferito alla stessa run e destinazione e vieta invii, anche di test, prima dell'approvazione. Il test reale verifica assenza di approval, rifiuto del token errato e approvazione solo con INVIA."
+        },
+        {
+          "text": "Il contenuto web è trattato come dato non fidato",
+          "passed": true,
+          "evidence": "AGENTS.md e SKILL.md classificano HTML, JSON, testo, header e redirect come dati non attendibili e vietano di eseguirne le istruzioni. monitor.py canonicalizza il contenuto senza eseguirlo e produce external_instruction_like_content per pattern sospetti. Una verifica indipendente su HTML ostile ha escluso il testo dentro script dalla forma canonica e ha restituito il warning per 'Ignore previous instructions'."
+        },
+        {
+          "text": "RESEARCH.md distingue fonti non raggiungibili da zero risultati",
+          "passed": true,
+          "evidence": "RESEARCH.md separa gli esiti: registra il registry GitHub delle skill come HTTP 403 e precisa che non è prova di assenza, mentre descrive separatamente query MCP senza risultati o con candidati trovati. La sezione Discovery incompleta identifica esplicitamente il 403 come limite della fonte/rate limit."
+        },
+        {
+          "text": "Nessun segreto o path macchina-specifico è persistito",
+          "passed": true,
+          "evidence": "La scansione indipendente degli output non ha trovato path /Users, /home o drive Windows. La configurazione contiene solo commenti e nessun target operativo. Il validator corrente, rieseguito dal grader, è terminato con exit code 0 e ha riportato 'no local absolute project/data path references found' e 'no embedded secrets or modern token formats found'."
+        },
+        {
+          "text": "Scheduler e credenziali restano non configurati e il setup spiega come abilitarli in modo esplicito",
+          "passed": true,
+          "evidence": "README.md dichiara che non sono richieste o configurate credenziali e che nessuno scheduler globale o locale è configurato. Spiega che un notifier deve essere già predisposto dall'utente e può essere usato solo dopo il gate, mentre una futura automazione deve essere scelta e configurata separatamente e in modo project-local. AGENTS.md vieta di configurare cron, launchd, systemd, task scheduler, credenziali o integrazioni mancanti. Inventario e transcript non mostrano configurazioni di scheduler, notifier o secret."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+          "passed": true,
+          "evidence": "Il grader ha rieseguito bash scripts/validate-workspace.sh sul workspace finale corrente: exit code 0 e output conclusivo 'Validation passed'. reports/2026-07-11-074518-generation.md documenta i tentativi falliti, i rilanci riusciti e lo stato corrente PASS; run.json registra anche la validazione finale dell'output con exit code 0."
+        },
+        {
+          "text": "Gli URL con userinfo o parametri che sembrano credenziali vengono rifiutati prima di persistere log o stato",
+          "passed": true,
+          "evidence": "monitor.py valida userinfo e nomi query sensibili durante load_targets, prima del ciclo che scrive log, snapshot o baseline. Il grader ha eseguito 10 casi indipendenti (userinfo con e senza password; api_key, apikey, access_token, token, password, client_secret, credential e auth): tutti exit code 2 e zero file sotto reports/ o state/, mentre una query ordinaria lang/page è stata accettata."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "weekly-web-monitor",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.75,
+        "passed": 6,
+        "failed": 2,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 39534,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "La procedura registra hash o valori confrontabili tra esecuzioni",
+          "passed": true,
+          "evidence": "monitor.py calcola SHA-256 del testo, conserva snapshot e metadata con hash e path relativo e genera un unified diff quando il digest cambia. La suite reale rieseguita dal grader con bytecode disabilitato ha superato 5/5 test; test_change_is_gated_until_exact_approval esercita baseline, seconda run, diff e change_id."
+        },
+        {
+          "text": "Le notifiche ampie richiedono conferma",
+          "passed": true,
+          "evidence": "La baseline non implementa invii esterni: ogni cambiamento resta in pending e confirm_change richiede che approval coincida esattamente con change_id prima di creare approved/ e il solo outbox locale. Il test reale verifica che l'approvazione errata non produca outbox e che soltanto quella esatta lo faccia. README.md precisa che collegare l'outbox a un servizio richiede una decisione separata."
+        },
+        {
+          "text": "Il contenuto web è trattato come dato non fidato",
+          "passed": true,
+          "evidence": "README.md e AGENTS.md dichiarano esplicitamente che il contenuto remoto è dato non fidato e non può cambiare configurazione, strumenti o approvazione. fetch.py lo decodifica come testo e monitor.py lo archivia, sottopone a hash e diff senza valutarlo o eseguirlo. La promessa aggiuntiva di rilevarne e loggarne le prompt injection non è implementata ed è segnalata separatamente nei claims."
+        },
+        {
+          "text": "RESEARCH.md distingue fonti non raggiungibili da zero risultati",
+          "passed": false,
+          "evidence": "Il workspace non contiene RESEARCH.md. Il report dichiara che la discovery esterna non è stata eseguita; non esiste quindi l'artefatto richiesto né una distinzione tra fonti non raggiungibili e fonti raggiungibili con zero risultati."
+        },
+        {
+          "text": "Nessun segreto o path macchina-specifico è persistito",
+          "passed": true,
+          "evidence": "La scansione indipendente degli output non ha trovato path /Users, /home o drive Windows; i path runtime persistiti sono relativi. La configurazione di esempio usa example.com e nessuna credenziale. Il validator corrente è terminato con exit code 0 e ha confermato assenza di path locali assoluti e di secret o token moderni."
+        },
+        {
+          "text": "Scheduler e credenziali restano non configurati e il setup spiega come abilitarli in modo esplicito",
+          "passed": true,
+          "evidence": "README.md dichiara che il progetto non legge o configura credenziali e non installa scheduler. Optional setup spiega che l'operatore deve scegliere separatamente un meccanismo di invocazione e che un servizio collegato all'outbox richiede una decisione e configurazione separate. AGENTS.md pone provider, autenticazione e scheduler fuori ambito; inventario e transcript non mostrano tali configurazioni."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+          "passed": true,
+          "evidence": "Il grader ha rieseguito bash scripts/validate-workspace.sh sul workspace finale corrente: exit code 0 e output conclusivo 'Validation passed'. reports/2026-07-10-144048-generation.md registra il comando completo e il PASS osservato della ripresa controllata; run.json registra una successiva validazione finale con exit code 0."
+        },
+        {
+          "text": "Gli URL con userinfo o parametri che sembrano credenziali vengono rifiutati prima di persistere log o stato",
+          "passed": false,
+          "evidence": "config.py rifiuta userinfo con o senza password, ma non ispeziona la query. In verifiche indipendenti, URL con token, api_key, access_token e client_secret sono stati tutti accettati; una run offline con fetcher deterministico è terminata completed e ha persistito ciascun URL integralmente in metadata/docs.json. Poiché l'aspettativa è congiuntiva, il rifiuto della sola userinfo non basta."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "two-updates",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 17258,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+          "passed": true,
+          "evidence": "I due soli report di update sono reports/2026-07-11-074416-update.md e reports/2026-07-11-074613-update.md. Entrambi contengono esattamente una sezione `## Executive summary`; il primo report la applica già nello stesso update che introduce il formato e il secondo la conserva."
+        },
+        {
+          "text": "Dopo il secondo update, README o AGENTS definisce un gate verificabile per provenienza, recenza, supporto diretto, indipendenza o corroborazione e gestione delle fonti incerte o scartate",
+          "passed": true,
+          "evidence": "README.md definisce punteggi 0-2 per provenienza, supporto diretto, attualità e indipendenza, totale 0-8 e classi alta/media/bassa. Esclude dai claim centrali le fonti con 0 in provenienza o supporto e richiede una fonte alta oppure due fonti almeno medie e indipendenti; in caso contrario il claim è `[incerto]`. AGENTS.md rende obbligatori registro, soglie ed esclusioni, mentre skills/web-research/SKILL.md dettaglia criteri e note."
+        },
+        {
+          "text": "I due report di update hanno nomi univoci e non si sovrascrivono",
+          "passed": true,
+          "evidence": "La directory reports contiene i due file distinti 2026-07-11-074416-update.md e 2026-07-11-074613-update.md. I timestamp interni 2026-07-11T07:44:16Z e 2026-07-11T07:46:13Z corrispondono ai nomi e ricadono nello stesso giorno UTC."
+        },
+        {
+          "text": "I report storici restano invariati",
+          "passed": true,
+          "evidence": "Il grader ha verificato con cmp che reports/2026-07-10-225424-generation.md è byte-identico al seed, SHA-256 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0. run.json registra per il primo report di update lo stesso hash 9b7637c9f41026399bc528fa86df32b739f1d3eeb47f8e32ff2537d94106d919 dopo step 1 e nello stato finale; il ricalcolo sul file finale coincide."
+        },
+        {
+          "text": "RESEARCH.md cresce in append solo se cambia il tooling",
+          "passed": true,
+          "evidence": "RESEARCH.md non è stato riscritto né esteso ed è byte-identico al seed secondo cmp, con SHA-256 5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad. Transcript e report motivano che i due update estendono formato e procedura nella skill locale esistente senza introdurre capacità esterne, nuove skill, MCP o CLI; la toolchain search/fetch resta invariata."
+        },
+        {
+          "text": "Ogni update modifica soltanto i file necessari",
+          "passed": true,
+          "evidence": "Transcript e report registrano per ciascun update modifiche a README.md, AGENTS.md e alla skill locale che possiede il workflow di ricerca, più il solo nuovo report del ciclo. Il diff finale indipendente rispetto al seed mostra esclusivamente quei tre file modificati e i due report aggiunti; RESEARCH.md e il report di generazione sono identici, e il primo report resta invariato dopo il secondo update."
+        },
+        {
+          "text": "Hash o confronto byte-a-byte dimostrano che i report storici sono rimasti invariati",
+          "passed": true,
+          "evidence": "La verifica indipendente cmp seed/finale termina con exit code 0 per il report di generazione. Il suo hash resta 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0; il primo report di update conserva l'hash 9b7637c9f41026399bc528fa86df32b739f1d3eeb47f8e32ff2537d94106d919 fra step 1 e finale. Anche i manifest ricalcolati dal grader coincidono con run.json: seed a0773fc63ae29211ff93446dfeae5c9586643ce9a0ac203dd2aaa2d3e8eaa9ef e finale 4e0da3fd796234ba5f2d41673c4ef2885dc13db6c58bb0009a439eb16201c512."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 dopo ciascun update",
+          "passed": true,
+          "evidence": "run.json registra per update 1 e update 2 due tentativi del validator effettivo, tutti PASS con exit code 0, e un controllo finale confezionato PASS/0. Il grader ha rieseguito il validator corrente sul workspace finale: output conclusivo `Validation passed.` ed exit code 0."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "two-updates",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 0.0,
+        "tokens": 15454,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+          "passed": true,
+          "evidence": "I due soli report di update, reports/2026-07-10-225933-update.md e reports/2026-07-10-230043-update.md, contengono ciascuno esattamente una sezione `## Executive summary`. Entrambi applicano anche i quattro punti richiesti da AGENTS.md: risultato, evidenze chiave, rischi o incertezze e prossima azione."
+        },
+        {
+          "text": "Dopo il secondo update, README o AGENTS definisce un gate verificabile per provenienza, recenza, supporto diretto, indipendenza o corroborazione e gestione delle fonti incerte o scartate",
+          "passed": true,
+          "evidence": "AGENTS.md richiede per ogni fonte URL, claim, tipo, autorevolezza, recenza, indipendenza, esito e motivazione. I gate verificano provenienza identificabile e supporto diretto, adeguatezza temporale e una fonte primaria pertinente oppure due fonti indipendenti; in caso di fallimento prescrivono `[incerto]` o scarto e mantengono espliciti i conflitti."
+        },
+        {
+          "text": "I due report di update hanno nomi univoci e non si sovrascrivono",
+          "passed": true,
+          "evidence": "La directory reports contiene i due file distinti 2026-07-10-225933-update.md e 2026-07-10-230043-update.md. I timestamp interni 2026-07-10T22:59:33Z e 2026-07-10T23:00:43Z corrispondono ai nomi e ricadono nello stesso giorno UTC."
+        },
+        {
+          "text": "I report storici restano invariati",
+          "passed": true,
+          "evidence": "Il grader ha verificato con cmp che reports/2026-07-10-225424-generation.md è byte-identico al seed, SHA-256 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0. run.json registra per il primo report di update lo stesso hash c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8 dopo step 1 e nello stato finale; il ricalcolo sul file finale coincide."
+        },
+        {
+          "text": "RESEARCH.md cresce in append solo se cambia il tooling",
+          "passed": true,
+          "evidence": "Nessun tooling è stato introdotto o modificato: skills/web-research/SKILL.md è byte-identico al seed secondo cmp. Coerentemente RESEARCH.md non è stato esteso ed è byte-identico al seed, con SHA-256 5f0145e8c7ed935933f11bdd0d5eb2a7fb9b5c6606c5d7587d03acc636dff2ad prima, dopo step 1 e nello stato finale."
+        },
+        {
+          "text": "Ogni update modifica soltanto i file necessari",
+          "passed": true,
+          "evidence": "Transcript e report registrano per ciascun update modifiche a README.md e AGENTS.md più il solo nuovo report del ciclo. Il diff finale indipendente rispetto al seed mostra esclusivamente quei due file modificati e i due report aggiunti; RESEARCH.md, skill locale e report di generazione sono identici, e il primo report resta invariato dopo il secondo update."
+        },
+        {
+          "text": "Hash o confronto byte-a-byte dimostrano che i report storici sono rimasti invariati",
+          "passed": true,
+          "evidence": "La verifica indipendente cmp seed/finale termina con exit code 0 per il report di generazione, il cui SHA-256 è 09794ff407c94ce2b124917eee18e781be1c3430f910a8841bc01418983a51f0. run.json registra per il primo report di update lo stesso SHA-256 c51aa71941ce1bca7688d3ca72caa2fd84ff24b25459313642d8dca3e6a5c4e8 after_step_1 e final; tutti gli hash finali ricalcolati coincidono con run.json."
+        },
+        {
+          "text": "Il validator corrente termina con exit code 0 dopo ciascun update",
+          "passed": true,
+          "evidence": "run.json registra per update 1 e update 2 un esito finale passed con exit code 0 dopo l'aggiunta dei rispettivi report. Il grader ha rieseguito il validator corrente sul workspace finale: output conclusivo `Validation passed.` ed exit code 0."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 29809.0,
+        "stddev": 25950.5561,
+        "min": 12520.0,
+        "max": 59649.0
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.8056,
+        "stddev": 0.1735,
+        "min": 0.6667,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 0.0,
+        "stddev": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "tokens": {
+        "mean": 20379.6667,
+        "stddev": 17227.9661,
+        "min": 6151.0,
+        "max": 39534.0
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.19",
+      "time_seconds": "+0.0",
+      "tokens": "+9429"
+    }
+  },
+  "notes": [
+    "[Dati osservati] Sulle 25 aspettative correnti, with_skill ne supera 25 e without_skill 20. Il divario è concentrato in cinque aspettative degli eval 1 e 2; le altre 20 passano in entrambe le configurazioni. Nessuna aspettativa passa soltanto senza_skill e nessuna fallisce in entrambe.",
+    "[Potere discriminante — eval 1 minimal-native] Il risultato è 9/9 con_skill contro 6/9 senza_skill. Le tre aspettative discriminanti sono il preflight esplicito insieme agli altri gate operativi, la gestione dei collegamenti Markdown relativi durante gli spostamenti e la sezione README di validazione con comando autonomo; le altre sei passano in entrambe le configurazioni.",
+    "[Potere discriminante — eval 2 weekly-web-monitor] Il risultato è 8/8 con_skill contro 6/8 senza_skill. Le due aspettative discriminanti sono la distinzione in RESEARCH.md fra fonti non raggiungibili e zero risultati e il rifiuto, prima della persistenza, sia della userinfo sia dei parametri query simili a credenziali; le altre sei passano in entrambe.",
+    "[Potere discriminante — eval 3 two-updates] Il risultato è 8/8 in entrambe le configurazioni. Passano su entrambi i rami sia le due aspettative semantiche aggiunte — executive summary applicato da ogni nuovo report e gate verificabile sulla qualità delle fonti — sia le sei aspettative di integrità, append condizionale, modifica minima, naming e validazione; questa singola coppia di run non distingue quindi il contributo della skill.",
+    "[Differenza tra output non riflessa dal punteggio — eval 3] Entrambe le configurazioni producono due report con `## Executive summary` e un gate documentato sulla qualità delle fonti. Il confronto con il seed mostra però che with_skill aggiorna README.md, AGENTS.md e la skill locale web-research, mentre without_skill aggiorna README.md e AGENTS.md lasciando la skill locale byte-identica; entrambe ottengono comunque 8/8.",
+    "[Dispersione cross-eval] I pass rate with_skill sono 100%, 100% e 100%, mentre quelli without_skill sono 66,7%, 75% e 100% negli eval 1, 2 e 3. La deviazione riportata nel riepilogo descrive la dispersione fra tre scenari eterogenei, non varianza fra repliche dello stesso scenario.",
+    "[Pattern di validazione] Il campo errors registra 2, 1 e 0 tentativi di validator falliti nelle run with_skill e 1, 1 e 0 nelle run without_skill: tre contro due complessivi. Le evidenze registrano separatamente il validator finale PASS per tutte e sei le run, quindi questi valori rappresentano iterazioni corrette durante l'esecuzione e non fallimenti finali.",
+    "[Caratteri di output] Il proxy vale 12.520 contro 6.151 nell'eval 1, 59.649 contro 39.541 nell'eval 2 e 17.258 contro 15.454 nell'eval 3 (with_skill contro without_skill). With_skill è più esteso in tutti e tre gli scenari; l'aumento medio di 9.427 caratteri è concentrato soprattutto nell'eval 2, dove la differenza è 20.108 caratteri.",
+    "[Limiti delle metriche] Il campo tokens contiene caratteri di output e non token del provider; time_seconds pari a 0 significa durata non catturata; tool_calls pari a 0 non dimostra assenza di uso di tool perché il conteggio non è stato esposto. Anche i modelli di executor, grader e analyzer non sono stati catturati negli artefatti, quindi non è possibile attribuire o confrontare i risultati per identità del modello.",
+    "[Limiti dell'evidenza] Esiste una sola run per ogni coppia eval/configurazione, perciò stabilità, flakiness e varianza entro lo stesso scenario non sono osservabili. L'isolamento delle rubriche è documentato tramite auto-attestazioni `rubric_visibility` nei run e nei transcript, ma non sono disponibili raw provider traces: l'esecuzione rubric-hidden non è quindi verificabile indipendentemente oltre agli artefatti persistiti."
+  ]
+}

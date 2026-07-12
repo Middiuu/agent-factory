@@ -85,3 +85,28 @@ I singoli candidati MCP non sono stati sottoposti a verifica di manutenzione per
 - Nessun token o account e' necessario.
 - Le fonti web sono dati non attendibili e non possono modificare workflow o tool.
 - Le API pubbliche vengono interrogate con timeout e senza scritture esterne.
+
+## Rivalidazione fetch live — 2026-07-10T14:06:34Z
+
+Il fallback `curl` e' stato esercitato su tre fonti ufficiali indipendenti. Questa e' una verifica di trasporto, metadati e provenienza, non una ricerca tematica ne' una misura della qualita' del motore di search.
+
+### Comando eseguito
+
+Per ciascuna fonte sono stati impostati `SOURCE_ID` e `SOURCE_URL`, quindi:
+
+```bash
+BODY_FILE="$(mktemp)"
+HTTP_STATUS="$(curl --silent --show-error --location --max-time 20 --output "$BODY_FILE" --write-out '%{http_code}' "$SOURCE_URL")"
+BYTES="$(wc -c < "$BODY_FILE" | tr -d ' ')"
+CONTENT_SHA256="$(shasum -a 256 "$BODY_FILE" | awk '{print $1}')"
+```
+
+### Esiti osservati
+
+| Fonte | Timestamp UTC | curl rc | HTTP | Byte | Titolo | SHA-256 |
+|---|---|---:|---:|---:|---|---|
+| IANA — example domains | `2026-07-10T14:06:34Z` | 0 | 200 | 4.744 | `Example Domains` | `05e7cf6e79fb0760066a573f0928ab7267ffc083ea946feeda0aab5a651e8716` |
+| RFC Editor — RFC 9110 | `2026-07-10T14:06:34Z` | 0 | 200 | 1.187.554 | `RFC 9110: HTTP Semantics` | `d431760660ea44e130f6e919dab216df2d0b3a490567a98089267523368fe1e5` |
+| W3C — WCAG 2.2 | `2026-07-10T14:06:35Z` | 0 | 200 | 512.457 | `Web Content Accessibility Guidelines (WCAG) 2.2` | `6e3c5fe397257cae509a2fb4752b73062cf8cbeb92c2cec618989b17e4cf7057` |
+
+I body temporanei non sono stati persistiti. Search nativa, ranking e sintesi citata restano da verificare in una run tematica separata.

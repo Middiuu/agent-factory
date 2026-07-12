@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "eval_id": 2,
+  "eval_name": "weekly-web-monitor",
+  "configuration": "with_skill",
+  "run_number": 1,
+  "prompt": "Genera un agente di monitoraggio web settimanale con log, confronto dei cambiamenti e notifiche solo dopo conferma. Non configurare credenziali o scheduler globali.",
+  "status": "passed",
+  "method": "rubric_hidden_with_skill",
+  "started_at_utc": "2026-07-11T07:45:18Z",
+  "completed_at_utc": "2026-07-11T07:55:38Z",
+  "artifacts": [
+    "transcript.md",
+    "outputs/workspace/AGENTS.md",
+    "outputs/workspace/README.md",
+    "outputs/workspace/RESEARCH.md",
+    "outputs/workspace/config/targets.tsv",
+    "outputs/workspace/reports/2026-07-11-074518-generation.md",
+    "outputs/workspace/skills/weekly-web-monitor/SKILL.md",
+    "outputs/workspace/skills/weekly-web-monitor/scripts/monitor.py",
+    "outputs/workspace/skills/weekly-web-monitor/tests/test_monitor.py"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh skills/agent-workspace-builder/evals/runs/iteration-1/eval-2-weekly-web-monitor/with_skill/run-1/outputs/workspace",
+    "command_path_form": "normalized repository-relative; equivalent to the observed absolute-path invocation",
+    "result": "passed",
+    "exit_code": 0,
+    "attempts": 5,
+    "attempt_history": [
+      {
+        "scope": "temporary_workspace",
+        "attempt": 1,
+        "exit_code": 1,
+        "result": "failed"
+      },
+      {
+        "scope": "temporary_workspace",
+        "attempt": 2,
+        "exit_code": 0,
+        "result": "passed"
+      },
+      {
+        "scope": "temporary_workspace",
+        "attempt": 3,
+        "exit_code": 0,
+        "result": "passed"
+      },
+      {
+        "scope": "temporary_workspace",
+        "attempt": 4,
+        "exit_code": 0,
+        "result": "passed"
+      },
+      {
+        "scope": "final_output_workspace",
+        "attempt": 5,
+        "exit_code": 0,
+        "result": "passed"
+      }
+    ]
+  },
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read"
+}

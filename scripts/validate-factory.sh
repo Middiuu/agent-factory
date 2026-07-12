@@ -334,6 +334,13 @@ check_templates() {
   if [ "$count" -eq 0 ]; then
     fail "no templates/*.md files found"
   fi
+
+  if grep -Fqx '## Executive summary' "$ROOT/templates/report-update.md" \
+      && grep -Fq '{{EXECUTIVE_SUMMARY}}' "$ROOT/templates/report-update.md"; then
+    pass "update report template requires an executive summary"
+  else
+    fail "templates/report-update.md must contain the executive summary section and placeholder"
+  fi
 }
 
 check_workflow_coverage() {
@@ -347,6 +354,9 @@ check_workflow_coverage() {
     'bash scripts/validate-workspace.sh' \
     'bash scripts/test-validators.sh' \
     'bash scripts/test-discover.sh' \
+    'bash scripts/validate-evals.sh' \
+    'bash scripts/test-evals.sh' \
+    'bash scripts/check-repo-links.sh' \
     'bash scripts/lessons-ledger.sh validate'; do
     if grep -Fq "$required" "$workflow"; then
       pass "CI runs: $required"
@@ -366,15 +376,53 @@ check_workflow_coverage() {
   else
     fail "CI must supply LESSONS_BASE_REF for multi-commit append-only validation"
   fi
+
+  if grep -Fq 'ubuntu-latest' "$workflow" && grep -Fq 'macos-latest' "$workflow"; then
+    pass "CI validates on Ubuntu and macOS"
+  else
+    fail "CI must validate on Ubuntu and macOS"
+  fi
+
+  if grep -Eq 'actions/checkout@[0-9a-f]{40}' "$workflow"; then
+    pass "CI pins actions/checkout to a full commit SHA"
+  else
+    fail "CI must pin actions/checkout to a full commit SHA"
+  fi
+}
+
+check_workflow_action_pins() {
+  local workflow
+  local line
+  local rel
+  local count=0
+
+  while IFS= read -r -d '' workflow; do
+    rel="${workflow#$ROOT/}"
+    while IFS= read -r line; do
+      [ "$line" = "" ] && continue
+      count=$((count + 1))
+      if printf '%s\n' "$line" | grep -Eq 'uses:[[:space:]]+[^[:space:]@]+@[0-9a-f]{40}([[:space:]]*#.*)?$|uses:[[:space:]]+\./'; then
+        pass "$rel action reference is immutable: $(printf '%s\n' "$line" | sed 's/^[[:space:]]*//')"
+      else
+        fail "$rel contains an unpinned or unsupported action reference: $(printf '%s\n' "$line" | sed 's/^[[:space:]]*//')"
+      fi
+    done < <(grep -E '^[[:space:]]*-?[[:space:]]*uses:' "$workflow" 2>/dev/null || true)
+  done < <(find "$ROOT/.github/workflows" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print0)
+
+  if [ "$count" -eq 0 ]; then
+    fail "no GitHub Actions uses: references found"
+  fi
 }
 
 check_discovery_contract() {
   local discover="$ROOT/scripts/discover.sh"
   local test_discover="$ROOT/scripts/test-discover.sh"
+  local live_discover="$ROOT/scripts/test-live-discovery.sh"
+  local smoke_workflow="$ROOT/.github/workflows/discovery-smoke.yml"
   local marker
 
   [ -s "$discover" ] || return
-  for marker in DISCOVER_TIMEOUT run_with_timeout urlencode 'PACCHETTO ASSENTE' 'FONTE NON RAGGIUNGIBILE'; do
+  for marker in DISCOVER_TIMEOUT run_with_timeout urlencode registry.npmjs.org 'PACCHETTO ASSENTE' 'FONTE NON RAGGIUNGIBILE'; do
     if grep -Fq "$marker" "$discover"; then
       pass "discover.sh implements $marker"
     else
@@ -386,6 +434,57 @@ check_discovery_contract() {
     pass "discovery tests use deterministic command mocks"
   else
     fail "test-discover.sh must use tests/fixtures/discover-bin mocks"
+  fi
+
+  if [ -s "$test_discover" ] && grep -Fq 'multiword query uses npm search' "$test_discover"; then
+    pass "discovery tests cover multiword npm queries"
+  else
+    fail "test-discover.sh must cover multiword npm queries"
+  fi
+
+  if [ -s "$live_discover" ] && grep -Fq 'LIVE_DISCOVERY_MIN_REACHABLE' "$live_discover"; then
+    pass "live discovery smoke has an explicit reachability threshold"
+  else
+    fail "test-live-discovery.sh must enforce a reachability threshold"
+  fi
+
+  if [ -s "$smoke_workflow" ] \
+      && grep -Fq 'schedule:' "$smoke_workflow" \
+      && grep -Fq 'bash scripts/test-live-discovery.sh' "$smoke_workflow"; then
+    pass "scheduled workflow runs the bounded live discovery smoke"
+  else
+    fail "discovery smoke workflow must be scheduled and run test-live-discovery.sh"
+  fi
+}
+
+check_json_syntax() {
+  local file
+  local count=0
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    fail "python3 is required for JSON and Markdown-link validation"
+    return
+  fi
+
+  while IFS= read -r -d '' file; do
+    count=$((count + 1))
+    if python3 -m json.tool "$file" >/dev/null; then
+      pass "${file#$ROOT/} is valid JSON"
+    else
+      fail "${file#$ROOT/} is invalid JSON"
+    fi
+  done < <(find "$ROOT" -path "$ROOT/.git" -prune -o -type f -name '*.json' -print0)
+
+  if [ "$count" -eq 0 ]; then
+    fail "no JSON files found"
+  fi
+}
+
+check_repo_links() {
+  if bash "$ROOT/scripts/check-repo-links.sh" "$ROOT"; then
+    pass "repository-local Markdown links resolve"
+  else
+    fail "repository-local Markdown link validation failed"
   fi
 }
 
@@ -418,15 +517,47 @@ printf 'Validating agent-factory at %s\n' "$ROOT"
 for required_file in \
   README.md \
   AGENTS.md \
+  CHANGELOG.md \
+  CODE_OF_CONDUCT.md \
+  CONTRIBUTING.md \
+  SECURITY.md \
   skills/agent-workspace-builder/SKILL.md \
+  skills/agent-workspace-builder/evals/README.md \
+  skills/agent-workspace-builder/evals/evals.json \
+  skills/agent-workspace-builder/evals/files/research-seed/AGENTS.md \
+  skills/agent-workspace-builder/evals/files/research-seed/README.md \
+  skills/agent-workspace-builder/evals/files/research-seed/RESEARCH.md \
+  skills/agent-workspace-builder/evals/files/research-seed/skills/web-research/SKILL.md \
+  skills/agent-workspace-builder/evals/runs/iteration-1/analysis-notes.json \
+  skills/agent-workspace-builder/evals/runs/iteration-1/benchmark.json \
+  skills/agent-workspace-builder/evals/runs/iteration-1/benchmark.md \
+  skills/agent-workspace-builder/evals/runs/iteration-1/review.html \
+  skills/agent-workspace-builder/evals/results/2026-07-11-paired-benchmark.json \
   reports/lessons.md \
   reports/lesson-events.tsv \
+  reports/agent-factory-technical-overview.md \
   scripts/validate-factory.sh \
   scripts/validate-workspace.sh \
   scripts/discover.sh \
+  scripts/check-repo-links.py \
+  scripts/check-repo-links.sh \
   scripts/test-discover.sh \
+  scripts/test-evals.sh \
+  scripts/test-live-discovery.sh \
   scripts/test-validators.sh \
+  scripts/build-eval-artifacts.py \
+  scripts/build-eval-artifacts.sh \
+  scripts/validate-evals.py \
+  scripts/validate-evals.sh \
   scripts/lessons-ledger.sh \
+  .github/CODEOWNERS \
+  .github/dependabot.yml \
+  .github/pull_request_template.md \
+  .github/ISSUE_TEMPLATE/config.yml \
+  .github/ISSUE_TEMPLATE/bug_report.yml \
+  .github/ISSUE_TEMPLATE/improvement.yml \
+  .github/ISSUE_TEMPLATE/security_channel.yml \
+  .github/workflows/discovery-smoke.yml \
   .github/workflows/validate.yml; do
   require_file "$required_file"
 done
@@ -436,13 +567,17 @@ require_dir "templates"
 require_dir "scripts"
 require_dir "tests/fixtures"
 require_dir ".github/workflows"
+require_dir ".github/ISSUE_TEMPLATE"
 
 check_shell_scripts
 check_blueprint_index
 check_skill_doc_references
 check_templates
 check_workflow_coverage
+check_workflow_action_pins
 check_discovery_contract
+check_json_syntax
+check_repo_links
 check_lesson_ledger
 check_factory_privacy
 

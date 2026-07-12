@@ -10,6 +10,8 @@ DISCOVER="$ROOT/scripts/discover.sh"
 MOCK_BIN="$ROOT/tests/fixtures/discover-bin"
 TEST_PATH="$MOCK_BIN:/usr/bin:/bin"
 failures=0
+runtime_bin="$(mktemp -d "${TMPDIR:-/tmp}/agent-factory-discover-tests.XXXXXX")"
+trap 'rm -rf "$runtime_bin"' EXIT
 
 pass() {
   printf 'OK   %s\n' "$1"
@@ -78,6 +80,36 @@ assert_not_contains "$network_output" 'PACCHETTO ASSENTE' "network failure is ne
 
 encoded_output="$(run_discovery success 2 '@scope/pkg & tool' mcp 2>&1)"
 assert_contains "$encoded_output" '%40scope%2Fpkg%20%26%20tool' "MCP query is URL encoded"
+
+multiword_output="$(run_discovery success 2 'web fetch' cli 2>&1)"
+assert_contains "$multiword_output" 'STATO FONTE: raggiungibile — npm registry' "multiword query uses npm search"
+assert_contains "$multiword_output" 'Lookup npm esatto saltato' "multiword query skips invalid npm exact lookup"
+assert_contains "$multiword_output" 'Lookup PyPI esatto saltato' "multiword query skips invalid PyPI exact lookup"
+assert_not_contains "$multiword_output" 'errore npm exit' "multiword query is not mislabeled as an npm outage"
+
+malformed_output="$(run_discovery malformed 2 web all 2>&1)"
+for source in 'GitHub skill registry' 'registry MCP ufficiale' 'npm registry' 'PyPI'; do
+  assert_contains "$malformed_output" "FONTE NON RAGGIUNGIBILE: $source" "malformed schema rejects $source"
+  assert_not_contains "$malformed_output" "STATO FONTE: raggiungibile — $source" "malformed schema never marks $source reachable"
+done
+
+nested_malformed_output="$(run_discovery nested-malformed 2 web all 2>&1)"
+for source in 'GitHub skill registry' 'registry MCP ufficiale' 'npm registry' 'PyPI'; do
+  assert_contains "$nested_malformed_output" "FONTE NON RAGGIUNGIBILE: $source" "nested schema drift rejects $source"
+  assert_not_contains "$nested_malformed_output" "STATO FONTE: raggiungibile — $source" "nested schema drift never marks $source reachable"
+done
+
+cp "$MOCK_BIN/curl" "$runtime_bin/curl"
+chmod +x "$runtime_bin/curl"
+no_npm_output="$(
+  PATH="$runtime_bin:/usr/bin:/bin" \
+    MOCK_DISCOVER_SCENARIO=success \
+    DISCOVER_FORCE_NO_JQ=1 \
+    DISCOVER_TIMEOUT=2 \
+    bash "$DISCOVER" web cli 2>&1
+)"
+assert_contains "$no_npm_output" 'STATO FONTE: raggiungibile — npm registry' "npm HTTP search works without npm CLI"
+assert_contains "$no_npm_output" 'Lookup npm esatto saltato: comando npm non disponibile' "missing npm CLI skips only exact lookup"
 
 timeout_output="$(run_discovery timeout 3 web cli 2>&1)"
 assert_contains "$timeout_output" 'FONTE NON RAGGIUNGIBILE: Homebrew (timeout dopo 3s)' "Homebrew timeout is explicit"
