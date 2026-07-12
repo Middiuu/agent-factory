@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Segnalazione privata di sicurezza
+    url: https://github.com/Middiuu/agent-factory/security/advisories/new
+    about: Non pubblicare vulnerabilità, credenziali o dettagli sensibili in una issue.

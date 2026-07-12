@@ -85,3 +85,21 @@ Flutter, app, device ed emulatori non erano disponibili insieme, quindi build e 
 - SDK e tool globali restano requisiti espliciti dell'utente.
 - Certificati, keystore, provisioning e credenziali non entrano nel workspace.
 - Release e pubblicazione richiedono sempre conferma umana.
+
+## Rivalidazione ambiente — 2026-07-10T14:08:42Z
+
+La verifica e' stata limitata intenzionalmente a SDK e target osservabili: nessuna app Flutter e' stata creata e nessuna build e' stata simulata.
+
+### Comandi ed esiti
+
+| Comando | Exit code | Esito osservato |
+|---|---:|---|
+| `command -v flutter` | 1 | Flutter SDK assente |
+| `command -v adb` | 1 | Android platform tools assenti |
+| `command -v xcrun` | 0 | comando disponibile |
+| `xcrun --version` | 0 | `xcrun version 72.` |
+| `xcrun simctl list devices` | 72 | utility `simctl` non trovata come developer tool o nel PATH |
+
+### Impatto
+
+I prerequisiti dichiarati dal workspace sono coerenti con l'ambiente osservato, ma Flutter, analisi, test, build e target mobile restano non verificati. Il risultato non promuove il blueprint: serve ancora una generazione reale con app e SDK disponibili.

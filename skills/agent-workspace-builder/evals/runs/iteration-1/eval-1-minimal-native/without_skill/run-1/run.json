@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "eval_id": 1,
+  "eval_name": "minimal-native",
+  "configuration": "without_skill",
+  "rubric_visibility": "not provided; eval definitions and prior evidence not read",
+  "run_number": 1,
+  "prompt": "Crea un workspace minimale per un agente che rinomina e organizza file Markdown locali. Il coding agent ha già capacità native sufficienti e non servono tool esterni.",
+  "started_at_utc": "2026-07-10T14:15:50Z",
+  "completed_at_utc": "2026-07-10T14:21:25Z",
+  "status": "passed",
+  "method": {
+    "kind": "controlled_baseline",
+    "agent_workspace_builder_skill_used": false,
+    "prohibited_material_inspected": false,
+    "external_tools_added": false,
+    "local_skills_added": false,
+    "validator_feedback_used": true
+  },
+  "factory": {
+    "commit": "5b4ea50",
+    "worktree_status": "dirty",
+    "exact_commit_reproducibility": false
+  },
+  "artifacts": [
+    "outputs/workspace/AGENTS.md",
+    "outputs/workspace/README.md",
+    "outputs/workspace/skills/.gitkeep",
+    "outputs/workspace/reports/2026-07-10-141550-generation.md",
+    "transcript.md"
+  ],
+  "validation": {
+    "command": "bash scripts/validate-workspace.sh skills/agent-workspace-builder/evals/runs/iteration-1/eval-1-minimal-native/without_skill/run-1/outputs/workspace",
+    "result": "PASS",
+    "exit_code": 0,
+    "attempts": [
+      {
+        "attempt": 1,
+        "result": "FAIL",
+        "exit_code": 1,
+        "reported_issue_count": 9
+      },
+      {
+        "attempt": 2,
+        "result": "PASS",
+        "exit_code": 0,
+        "reported_issue_count": 0
+      }
+    ]
+  },
+  "grading_status": "completed_by_separate_grader",
+  "metrics_status": "provider_metrics_unavailable"
+}

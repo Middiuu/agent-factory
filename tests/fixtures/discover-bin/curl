@@ -12,26 +12,46 @@ if [ "$scenario" = "network" ] || [ "$scenario" = "timeout" ]; then
   exit 28
 fi
 
+if [ "$scenario" = "malformed" ]; then
+  printf '%s\n%s' '{"unexpected":true}' '200'
+  exit 0
+fi
+
 case "$args" in
   *api.github.com*)
-    if [ "$scenario" = "absent" ]; then
+    if [ "$scenario" = "nested-malformed" ]; then
+      body='[{"unexpected":"web-search"}]'
+    elif [ "$scenario" = "absent" ]; then
       body='[{"name":"unrelated-skill"}]'
     else
       body='[{"name":"web-search"},{"name":"document-reader"}]'
     fi
     ;;
   *registry.modelcontextprotocol.io*)
-    if [ "$scenario" = "absent" ]; then
+    if [ "$scenario" = "nested-malformed" ]; then
+      body='{"servers":[{}]}'
+    elif [ "$scenario" = "absent" ]; then
       body='{"servers":[]}'
     else
       body='{"servers":[{"server":{"name":"web-fetch","description":"Fetch pages"}}]}'
+    fi
+    ;;
+  *registry.npmjs.org*)
+    if [ "$scenario" = "nested-malformed" ]; then
+      body='{"objects":[{"package":{"name":"web-search"}}]}'
+    elif [ "$scenario" = "absent" ]; then
+      body='{"objects":[]}'
+    else
+      body='{"objects":[{"package":{"name":"web-search","version":"1.0.0","description":"mock package"}}]}'
     fi
     ;;
   *api.npmjs.org/downloads*)
     body='{"downloads":42,"package":"mock-package"}'
     ;;
   *pypi.org*)
-    if [ "$scenario" = "absent" ]; then
+    if [ "$scenario" = "nested-malformed" ]; then
+      body='{"info":{"name":[],"version":"1.0.0"}}'
+    elif [ "$scenario" = "absent" ]; then
       status="404"
       body='{"message":"Not Found"}'
     else

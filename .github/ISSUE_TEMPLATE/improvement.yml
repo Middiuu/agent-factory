@@ -1,0 +1,37 @@
+name: Proposta di miglioramento
+description: Proponi un miglioramento verificabile alla fabbrica.
+title: "[Improvement]: "
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Esigenza
+      description: Quale limite generalizzabile vuoi risolvere?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Descrivi la modifica minima e i contratti interessati.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidenza e criterio di accettazione
+      description: Indica fixture, test o segnali che dimostrerebbero il risultato.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Rischi e alternative
+      description: Elenca compromessi, opzioni scartate e impatto sulla portabilità.
+  - type: checkboxes
+    id: governance
+    attributes:
+      label: Governance
+      options:
+        - label: La proposta non contiene dati o dettagli di workspace generati.
+          required: true

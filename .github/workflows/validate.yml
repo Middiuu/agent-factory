@@ -7,14 +7,101 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
+  static-quality:
+    name: Static quality
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+      ACTIONLINT_VERSION: 1.7.12
+      SHELLCHECK_SHA256: 8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198
+      SHELLCHECK_VERSION: 0.11.0
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Validate JSON syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            python3 -m json.tool "$file" >/dev/null
+          done < <(find . -path ./.git -prune -o -type f -name '*.json' -print0)
+
+      - name: Validate YAML syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            ruby -e 'require "yaml"; YAML.parse_file(ARGV.fetch(0))' "$file"
+          done < <(find . -path ./.git -prune -o -type f \( -name '*.yml' -o -name '*.yaml' \) -print0)
+
+      - name: Validate shell
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/shellcheck.tar.xz"
+          curl --fail --location --silent --show-error \
+            "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz" \
+            --output "$archive"
+          printf '%s  %s\n' "$SHELLCHECK_SHA256" "$archive" | sha256sum --check --status
+          tar -xJf "$archive" -C "$RUNNER_TEMP"
+          shellcheck="$RUNNER_TEMP/shellcheck-v${SHELLCHECK_VERSION}/shellcheck"
+
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+            "$shellcheck" --severity=warning "$file"
+          done < <(find scripts tests/fixtures/discover-bin -type f \
+            \( -name '*.sh' -o -path 'tests/fixtures/discover-bin/*' \) -print0)
+
+      - name: Validate GitHub Actions semantics
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --location --silent --show-error \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            --output "$archive"
+          printf '%s  %s\n' "$ACTIONLINT_SHA256" "$archive" | sha256sum --check --status
+          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
+          PATH="$RUNNER_TEMP/shellcheck-v${SHELLCHECK_VERSION}:$PATH" "$RUNNER_TEMP/actionlint"
+
+      - name: Validate repository links
+        run: bash scripts/check-repo-links.sh
+
+  validate:
+    name: Validate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check whitespace errors
+        env:
+          DIFF_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          if [ -n "$DIFF_BASE" ] \
+              && ! printf '%s\n' "$DIFF_BASE" | grep -Eq '^0+$' \
+              && git rev-parse --verify "$DIFF_BASE^{commit}" >/dev/null 2>&1; then
+            git diff --check "$DIFF_BASE" HEAD --
+          else
+            empty_tree="$(git hash-object -t tree /dev/null)"
+            git diff --check "$empty_tree" HEAD --
+          fi
 
       - name: Validate factory
         run: bash scripts/validate-factory.sh
@@ -30,6 +117,12 @@ jobs:
 
       - name: Test discovery with deterministic mocks
         run: bash scripts/test-discover.sh
+
+      - name: Validate paired skill eval evidence
+        run: bash scripts/validate-evals.sh
+
+      - name: Test eval evidence tamper detection
+        run: bash scripts/test-evals.sh
 
       - name: Validate lessons ledger commands
         env:

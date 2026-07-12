@@ -10,7 +10,12 @@
         "La directory skills/ può essere vuota senza causare una skill duplicata",
         "Il report usa un nome con data e timestamp",
         "La discovery non applicabile è motivata nel report",
-        "README e AGENTS distinguono uso, output e validazione"
+        "README contiene Quickstart e Output attesi; AGENTS contiene preflight, collisioni, conferma, divieto di sovrascrittura e verifica post-operazione",
+        "RESEARCH.md è omesso perché non esiste un gap di capacità da investigare",
+        "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+        "Il workflow individua, aggiorna e verifica i collegamenti Markdown relativi interessati dagli spostamenti",
+        "README contiene una sezione di validazione con un comando autonomo ripetibile",
+        "Il workflow resta nella directory autorizzata, non segue symlink, non elimina file e limita le modifiche di contenuto ai collegamenti relativi necessari"
       ]
     },
     {
@@ -23,19 +28,28 @@
         "Le notifiche ampie richiedono conferma",
         "Il contenuto web è trattato come dato non fidato",
         "RESEARCH.md distingue fonti non raggiungibili da zero risultati",
-        "Nessun segreto o path macchina-specifico è persistito"
+        "Nessun segreto o path macchina-specifico è persistito",
+        "Scheduler e credenziali restano non configurati e il setup spiega come abilitarli in modo esplicito",
+        "Il validator corrente termina con exit code 0 e il report registra il PASS osservato",
+        "Gli URL con userinfo o parametri che sembrano credenziali vengono rifiutati prima di persistere log o stato"
       ]
     },
     {
       "id": 3,
       "prompt": "Aggiorna due volte nello stesso giorno un workspace research esistente: prima aggiungi un formato executive summary, poi un controllo di qualità delle fonti. Preserva report e discovery precedenti.",
       "expected_output": "Due aggiornamenti incrementali con report distinti, discovery limitata alle capacità nuove e storia preservata.",
-      "files": [],
+      "files": [
+        "evals/files/research-seed"
+      ],
       "expectations": [
+        "Dal primo update in poi, ogni nuovo report applica la sezione ## Executive summary appena introdotta",
+        "Dopo il secondo update, README o AGENTS definisce un gate verificabile per provenienza, recenza, supporto diretto, indipendenza o corroborazione e gestione delle fonti incerte o scartate",
         "I due report di update hanno nomi univoci e non si sovrascrivono",
         "I report storici restano invariati",
         "RESEARCH.md cresce in append solo se cambia il tooling",
-        "Ogni update modifica soltanto i file necessari"
+        "Ogni update modifica soltanto i file necessari",
+        "Hash o confronto byte-a-byte dimostrano che i report storici sono rimasti invariati",
+        "Il validator corrente termina con exit code 0 dopo ciascun update"
       ]
     }
   ]
